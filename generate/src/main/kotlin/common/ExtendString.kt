@@ -32,6 +32,7 @@ fun String?.getAsClassName(
     val isChoices = this.isNullOrEmpty() && choices.isNotEmpty()
     val isAny = this.equals("any", true)
     val isBoolean = this.equals("boolean", true) || this.equals("bool", true)
+    val isBinary = this.equals("binary", true)
 
     val typeName = when {
         isAny -> Any::class.asTypeName()
@@ -39,6 +40,7 @@ fun String?.getAsClassName(
         isNumber -> Number::class.asTypeName()
         isString -> String::class.asTypeName()
         isBoolean -> Boolean::class.asTypeName()
+        isBinary -> ClassName("org.w3c.dom", "BinaryType")
         isObject -> onIsObject()
         else -> null
     }?.normalizeNullable(optional)
@@ -65,4 +67,8 @@ fun String?.getFromReference(
         }}"
         ClassName(packageName, this.substringAfterLast('.')).normalizeNullable(optional)
     }
+}
+
+fun String.escapeForKdoc(): String {
+    return this.replace("/*", "//").replace("*/", "")
 }

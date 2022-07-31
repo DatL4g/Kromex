@@ -1,4 +1,5 @@
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import common.decodeBase64
 import common.emoji
 import generator.*
@@ -34,9 +35,82 @@ fun main(vararg args: String) {
     }
 
     val sourceList = listOf<String>(
+        // Events first, although order doesn't matter, it's best to create it first
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/events.json?format=TEXT",
+
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/accessibility_features.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/accessibility_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/action.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/activity_log_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/app.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/app_view_guest_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/bookmark_manager_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/bookmarks.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/browser_action.json?format=TEXT",
-        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/runtime.json?format=TEXT"
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/browsing_data.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/chrome_web_view_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/chromeos_info_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/command_line_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/commands.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/content_settings.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/context_menus.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/cookies.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/dashboard_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/debugger.json?format=TEXT",
+        // "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/declarative_content.json?format=TEXT", invalid enums
+        // "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/declarative_web_request.json", invalid enums
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/desktop_capture.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/dom.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/echo_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/enterprise_platform_keys_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/extension.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/extensions_manifest_types.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/master/extensions/common/api/extension_types.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/file_browser_handler.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/file_browser_handler_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/font_settings.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/gcm.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/guest_view_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/history.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/i18n.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/idle.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/incognito.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/input_ime.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/input_method_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/instance_id.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/management.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/manifest_types.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/media_player_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/metrics_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/mime_handler_view_guest_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/omnibox.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/page_action.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/page_capture.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/permissions.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/privacy.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/proxy.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/requirements.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/runtime.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/sessions.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/storage.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/system_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/tab_groups.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/tabs.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/terminal_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/test.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/top_sites.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/tts.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/tts_engine.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/types.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/virtual_keyboard_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/wallpaper.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/web_navigation.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/web_request_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/web_view_internal.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/web_view_request.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/webstore_private.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/webview_tag.json?format=TEXT",
+
     )
 
     runBlocking {
@@ -58,8 +132,6 @@ private suspend fun retrieveSource(source: String, client: HttpClient) {
         println("Could not get JSON: ${response.status.description}".color(ConsoleColors.RED_BOLD).emoji(ConsoleEmojis.CROSS_MARK))
         return
     }
-
-    println("Decoding received JSON".color(ConsoleColors.YELLOW).emoji(ConsoleEmojis.WARNING_SIGN))
 
     var jsonData = response.bodyAsText().decodeBase64().trim()
 
@@ -132,14 +204,10 @@ private suspend fun retrieveSource(source: String, client: HttpClient) {
 private fun generateFile(
     extension: ExtensionJson
 ) {
-    println("Generating files for ${extension.namespace}".color(ConsoleColors.YELLOW).emoji(ConsoleEmojis.WARNING_SIGN))
-
     val importFileSpec = ImportFileGenerator.create(extension.namespace)
     val constructorFileSpec = ConstructorFileGenerator.create(extension.namespace)
 
-    extension.types.forEachIndexed { index, extensionType ->
-        println("Generating files for types: ${index+1}/${extension.types.size}".color(ConsoleColors.YELLOW).emoji(ConsoleEmojis.WARNING_SIGN))
-
+    extension.types.forEach { extensionType ->
         ExtensionTypeGenerator.create(
             importFileSpec,
             constructorFileSpec,
@@ -152,8 +220,7 @@ private fun generateFile(
         println("Generated files for all types".color(ConsoleColors.GREEN).emoji(ConsoleEmojis.CHECK_MARK))
     }
 
-    extension.properties.entries.forEachIndexed { index, entry ->
-        println("Generating properties: ${index+1}/${extension.properties.size}".color(ConsoleColors.YELLOW).emoji(ConsoleEmojis.WARNING_SIGN))
+    extension.properties.entries.forEach { entry ->
 
         ObjectGenerator.addProperty(
             importFileSpec,
@@ -168,8 +235,7 @@ private fun generateFile(
         println("Generated all properties".color(ConsoleColors.GREEN).emoji(ConsoleEmojis.CHECK_MARK))
     }
 
-    extension.functions.forEachIndexed { index, function ->
-        println("Generating functions: ${index+1}/${extension.functions.size}".color(ConsoleColors.YELLOW).emoji(ConsoleEmojis.WARNING_SIGN))
+    extension.functions.forEach { function ->
 
         FunctionGenerator.create(
             importFileSpec,
@@ -183,7 +249,7 @@ private fun generateFile(
         println("Generated all functions".color(ConsoleColors.GREEN).emoji(ConsoleEmojis.CHECK_MARK))
     }
 
-    extension.events.forEachIndexed { index, extensionEvent ->
+    extension.events.forEach { extensionEvent ->
         EventGenerator.create(
             importFileSpec,
             null,
@@ -193,8 +259,13 @@ private fun generateFile(
         )
     }
 
-    importFileSpec.build().writeTo(Constants.outputDir)
-    constructorFileSpec.build().writeTo(Constants.outputDir)
+    if (importFileSpec.members.isNotEmpty()) {
+        importFileSpec.build().writeTo(Constants.outputDir)
+    }
+
+    if (constructorFileSpec.members.isNotEmpty()) {
+        constructorFileSpec.build().writeTo(Constants.outputDir)
+    }
 }
 
 
@@ -203,8 +274,12 @@ fun getAssociatedInstance(isInstanceOf: String): TypeName {
         ClassName("org.w3c.dom", isInstanceOf)
     } else if (isInstanceOf.equals("Window", true)) {
         ClassName("org.w3c.dom", isInstanceOf)
+    } else if (isInstanceOf.equals("HTMLElement", true)) {
+        ClassName("org.w3c.dom", "HTMLElement")
     } else if (isInstanceOf.equals("DirectoryEntry", true)) {
         Any::class.asTypeName()
+    } else if (isInstanceOf.equals("Promise", true)) {
+        ClassName("kotlin.js", "Promise").parameterizedBy(Any::class.asTypeName())
     } else {
         ClassName("", isInstanceOf)
     }

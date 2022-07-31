@@ -2,10 +2,7 @@ package generator
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import common.getAsClassName
-import common.getFromReference
-import common.normalizeNullable
-import common.nullOrEmpty
+import common.*
 import getAssociatedInstance
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -34,26 +31,62 @@ object FunctionGenerator {
             .addModifiers(KModifier.EXTERNAL)
             .apply {
                 if (!extensionFunction.description.isNullOrEmpty()) {
-                    addKdoc(extensionFunction.description)
+                    addKdoc(extensionFunction.description.escapeForKdoc())
                 }
                 extensionFunction.parameters.forEach {
                     if (!it.isCallback) {
                         val typeName = it.type.getAsClassName(emptyList(), it.optional) {
                             val propertyName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}${it.name.replaceFirstChar { char -> char.uppercaseChar() }}"
 
-                            ObjectGenerator.create(
-                                constructorFileSpec,
-                                propertyName,
-                                namespace,
-                                null,
-                                it.description,
-                                it.properties,
-                                null,
-                                emptyList()
-                            )
+                            if (it.properties.isNotEmpty()) {
+                                ObjectGenerator.create(
+                                    constructorFileSpec,
+                                    propertyName,
+                                    namespace,
+                                    null,
+                                    it.description,
+                                    it.properties,
+                                    null,
+                                    emptyList(),
+                                    emptyList(),
+                                    emptyList()
+                                )
 
-                            ClassName("browser.${namespace}", propertyName)
-                        } ?: it.ref.getFromReference(namespace, it.optional) ?: Any::class.asTypeName()
+                                ClassName("browser.${namespace}", propertyName)
+                            } else {
+                                if (!it.isInstanceOf.isNullOrEmpty()) {
+                                    getAssociatedInstance(it.isInstanceOf)
+                                } else {
+                                    val additionalType = it.additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
+                                    additionalType.getAsClassName(emptyList(), it.optional) {
+                                        Any::class.asTypeName()
+                                    } ?: Any::class.asTypeName()
+                                }
+                            }
+                        } ?: it.ref.getFromReference(namespace, it.optional) ?: run {
+                            if (it.type.equals("array", true)) {
+                                val arrayType = it.items?.type.getAsClassName(it.items?.choices ?: emptyList(), false) {
+                                    ObjectGenerator.create(
+                                        constructorFileSpec,
+                                        name,
+                                        namespace,
+                                        it.isInstanceOf,
+                                        it.description,
+                                        it.properties.nullOrEmpty(it.items?.properties),
+                                        it.additionalProperties,
+                                        emptyList(),
+                                        emptyList(),
+                                        emptyList()
+                                    )
+                                    ClassName("browser.${namespace}", name)
+                                } ?: run {
+                                    it.items?.ref.getFromReference(namespace, false) ?: Any::class.asTypeName()
+                                }
+                                Array::class.asTypeName().parameterizedBy(arrayType)
+                            } else {
+                                null
+                            }
+                        } ?: Any::class.asTypeName()
 
                         addParameter(
                             ParameterSpec.builder(it.name, typeName)
@@ -62,7 +95,7 @@ object FunctionGenerator {
                                         defaultValue("definedExternally")
                                     }
                                     if (!it.description.isNullOrEmpty()) {
-                                        addKdoc(it.description)
+                                        addKdoc(it.description.escapeForKdoc())
                                     }
                                 }
                                 .build()
@@ -140,7 +173,7 @@ object FunctionGenerator {
                 val additionalType = returnData.additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
                 additionalType.getAsClassName(emptyList(), returnData.optional) {
                     Any::class.asTypeName()
-                } ?: Any::class.asTypeName()
+                } ?: if (!returnData.isInstanceOf.isNullOrEmpty()) getAssociatedInstance(returnData.isInstanceOf) else null ?: Any::class.asTypeName()
             } else {
                 val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                 ObjectGenerator.create(
@@ -154,7 +187,7 @@ object FunctionGenerator {
         } ?: run {
             val returnRef = returnData?.ref.getFromReference(namespace, returnData?.optional ?: false)
 
-            returnRef ?: run {
+            returnRef ?: if (!returnData?.isInstanceOf.isNullOrEmpty()) getAssociatedInstance(returnData!!.isInstanceOf!!) else null ?: run {
                 getFromParameters(
                     returnData?.parameters.nullOrEmpty(parameters.findLast { it.isCallback }?.parameters).toList(),
                     onListEmpty = {
@@ -184,7 +217,18 @@ object FunctionGenerator {
                                 Any::class.asTypeName()
                             } ?: Any::class.asTypeName()
                         } ?: run {
-                            it.ref.getFromReference(namespace, it.optional) ?: Any::class.asTypeName()
+                            it.ref.getFromReference(namespace, it.optional) ?: run {
+                                if (it.type.equals("array", true)) {
+                                    val arrayType = it.items?.type.getAsClassName(it.items?.choices ?: emptyList(), false) {
+                                        Any::class.asTypeName()
+                                    } ?: run {
+                                        it.items?.ref.getFromReference(namespace, false) ?: Any::class.asTypeName()
+                                    }
+                                    Array::class.asTypeName().parameterizedBy(arrayType)
+                                } else {
+                                    Any::class.asTypeName()
+                                }
+                            }
                         }
                     },
                     onMultipleProperties = {

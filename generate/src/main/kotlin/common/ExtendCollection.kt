@@ -7,3 +7,11 @@ fun <T> Collection<T>?.nullOrEmpty(instead: Collection<T>?): Collection<T> {
         this
     }
 }
+
+fun <K, V> Map<K, V>?.nullOrEmpty(instead: Map<K, V>?): Map<K, V> {
+    return if (this.isNullOrEmpty()) {
+        instead ?: emptyMap()
+    } else {
+        this
+    }
+}

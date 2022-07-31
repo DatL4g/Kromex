@@ -2,9 +2,7 @@ package generator
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import common.getAsClassName
-import common.getFromReference
-import common.normalizeNullable
+import common.*
 import getAssociatedInstance
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
@@ -22,7 +20,9 @@ object ObjectGenerator {
         description: String?,
         properties: Map<String, ExtensionProperty>,
         additionalProperties: JsonElement?,
-        events: List<ExtensionEvent>
+        events: List<ExtensionEvent>,
+        functions: List<ExtensionFunction>,
+        choices: List<ExtensionPropertyChoice>
     ) {
         val objectFileBuilder = FileSpec.builder("browser.${namespace}", name)
             .addAnnotation(
@@ -40,6 +40,10 @@ object ObjectGenerator {
             TypeSpec.classBuilder(name)
                 .addModifiers(KModifier.ABSTRACT, KModifier.EXTERNAL)
                 .addSuperinterface(getAssociatedInstance(isInstanceOf))
+        } else if (isInstanceOf.isNullOrEmpty() && choices.isNotEmpty()) {
+            TypeSpec.classBuilder(name)
+                .addModifiers(KModifier.ABSTRACT, KModifier.EXTERNAL)
+                .addSuperinterface(Any::class)
         } else {
             TypeSpec.interfaceBuilder(name)
                 .addModifiers(KModifier.EXTERNAL)
@@ -47,14 +51,13 @@ object ObjectGenerator {
 
         typeSpec.apply {
             if (!description.isNullOrEmpty()) {
-                addKdoc(description)
+                addKdoc(description.escapeForKdoc())
             }
             if (properties.isEmpty() && isInstanceOf.isNullOrEmpty()) {
                 val typeData = additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
                 val typeName = typeData.getAsClassName(emptyList(), false) {
                     Any::class.asTypeName()
                 } ?: Any::class.asTypeName()
-                addSuperinterface(typeName)
             } else {
                 properties.forEach { (t, u) ->
                     addProperty(
@@ -66,6 +69,10 @@ object ObjectGenerator {
                     )
                 }
             }
+        }
+
+        functions.forEach {
+            FunctionGenerator.create(null, typeSpec, constructorFileSpec, namespace, it)
         }
 
         events.forEach {
@@ -89,7 +96,11 @@ object ObjectGenerator {
         objectFileBuilder.addType(typeSpec.build())
         objectFileBuilder.build().writeTo(Constants.outputDir)
 
-        constructorFileSpec.addFunction(objectConstructor)
+        if (!constructorFileSpec.members.any {
+            (it as? FunSpec?)?.name?.equals(objectConstructor.name) == true
+        }) {
+            constructorFileSpec.addFunction(objectConstructor)
+        }
     }
 
     fun create(
@@ -104,7 +115,9 @@ object ObjectGenerator {
         extensionType.description,
         extensionType.properties,
         extensionType.additionalProperties,
-        extensionType.events
+        extensionType.events,
+        extensionType.functions,
+        extensionType.choices
     )
 
     fun create(
@@ -120,6 +133,8 @@ object ObjectGenerator {
         extensionFunctionParameter.description,
         extensionFunctionParameter.properties,
         extensionFunctionParameter.additionalProperties,
+        emptyList(),
+        emptyList(),
         emptyList()
     )
 
@@ -136,6 +151,8 @@ object ObjectGenerator {
         null,
         params.associate { it.name to ExtensionProperty(it.type, it.ref, it.description, it.optional, it._properties, it.parameters) },
         null,
+        emptyList(),
+        emptyList(),
         emptyList()
     )
 
@@ -152,6 +169,8 @@ object ObjectGenerator {
         extensionFunctionReturn.description,
         extensionFunctionReturn.properties,
         extensionFunctionReturn.additionalProperties,
+        emptyList(),
+        emptyList(),
         emptyList()
     )
 
@@ -166,8 +185,23 @@ object ObjectGenerator {
         namespace,
         null,
         extensionEvent.description,
-        extensionEvent.parameters.associate { it.name to ExtensionProperty(it.type, it.ref, it.description, it.optional, it._properties, it.parameters) },
+        extensionEvent.parameters.associate {
+            it.name to ExtensionProperty(
+                it.type,
+                it.ref,
+                it.description,
+                it.optional,
+                it._properties,
+                it.parameters,
+                null,
+                emptyList(),
+                it.items,
+                it.additionalProperties
+            )
+        },
         null,
+        emptyList(),
+        emptyList(),
         emptyList()
     )
 
@@ -184,12 +218,19 @@ object ObjectGenerator {
         }
 
         val typeName = extensionProperty.type.getAsClassName(extensionProperty.choices, extensionProperty.optional) {
-            createNestedInterface(
-                constructorFileSpec,
-                name,
-                namespace,
-                extensionProperty
-            )
+            if (extensionProperty.properties.isNotEmpty()) {
+                createNestedInterface(
+                    constructorFileSpec,
+                    name,
+                    namespace,
+                    extensionProperty.properties
+                )
+            } else {
+                val typeData = extensionProperty.additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
+                typeData.getAsClassName(emptyList(), false) {
+                    Any::class.asTypeName()
+                } ?: Any::class.asTypeName()
+            }
         } ?: extensionProperty.ref.getFromReference(namespace, extensionProperty.optional) ?: run {
             if (extensionProperty.type.equals("function", true)) {
                 FunctionGenerator.create(
@@ -214,9 +255,11 @@ object ObjectGenerator {
                         constructorFileSpec,
                         name,
                         namespace,
-                        extensionProperty
+                        extensionProperty.properties.nullOrEmpty(extensionProperty.items?.properties)
                     )
-                } ?: Any::class.asTypeName()
+                } ?: run {
+                    extensionProperty.items?.ref.getFromReference(namespace, false) ?: Any::class.asTypeName()
+                }
                 Array::class.asTypeName().parameterizedBy(arrayType)
             } else {
                 Any::class.asTypeName()
@@ -228,13 +271,15 @@ object ObjectGenerator {
                 .mutable()
                 .apply {
                     if (!extensionProperty.description.isNullOrEmpty()) {
-                        addKdoc(extensionProperty.description)
+                        try {
+                            addKdoc(extensionProperty.description.escapeForKdoc())
+                        } catch (ignored: Throwable) { }
                     }
                     if (!extensionProperty.deprecated.isNullOrEmpty()) {
                         addAnnotation(
                             AnnotationSpec.builder(Deprecated::class)
-                                .addMember("message = %S", extensionProperty.deprecated)
-                                .addMember("level = %M", DeprecationLevel.WARNING)
+                                .addMember("message = %S", extensionProperty.deprecated ?: String())
+                                .addMember("level = DeprecationLevel.WARNING")
                                 .build()
                         )
                     }
@@ -265,7 +310,7 @@ object ObjectGenerator {
         constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
-        extensionProperty: ExtensionProperty
+        properties: Map<String, ExtensionProperty>
     ): TypeName {
         val packageName = "browser.${namespace}"
         val className = "${name.replaceFirstChar { name.first().uppercaseChar() }}Property"
@@ -282,7 +327,7 @@ object ObjectGenerator {
         val propertyTypeSpec = TypeSpec.interfaceBuilder(propertyClass)
             .addModifiers(KModifier.EXTERNAL)
             .apply {
-                extensionProperty.properties.forEach { (t, u) ->
+                properties.forEach { (t, u) ->
                     addProperty(
                         this,
                         constructorFileSpec,

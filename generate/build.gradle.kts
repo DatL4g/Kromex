@@ -26,3 +26,11 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.0.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.0.3")
 }
+
+tasks.register<Delete>("cleanDirectory") {
+    delete = setOf(File("./../popup/src/main/kotlin/browser"))
+}
+
+tasks.getByName("clean") {
+    dependsOn(tasks.getByName("cleanDirectory"))
+}

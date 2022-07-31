@@ -14,7 +14,8 @@ data class ExtensionFunctionParameter(
     @SerialName("optional") val optional: Boolean = false,
     @SerialName("properties") override val _properties: JsonElement? = null,
     @SerialName("additionalProperties") val additionalProperties: JsonElement? = null,
-    @SerialName("parameters") val parameters: List<ExtensionFunctionParameter> = listOf()
+    @SerialName("parameters") val parameters: List<ExtensionFunctionParameter> = listOf(),
+    @SerialName("items") val items: ExtensionPropertyItem? = null
 ): PropertiesHolder() {
     val isCallback: Boolean
         get() = name.equals("callback", true) || type.equals("function", true)

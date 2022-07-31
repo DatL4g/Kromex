@@ -2,6 +2,7 @@ package generator
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import common.escapeForKdoc
 import common.normalizeNothingToUnit
 import common.normalizeNullable
 import model.ExtensionEvent
@@ -22,13 +23,17 @@ object EventGenerator {
         val eventClass = ClassName("browser.events", "Event")
         val eventListenerName = "${event.name.replaceFirstChar { char -> char.uppercaseChar() }}Listener"
 
-        ObjectGenerator.create(
-            constructorFileSpec,
-            eventListenerName,
-            namespace,
-            event
-        )
-        val eventListener = ClassName("browser.${namespace}", eventListenerName)
+        val eventListener = if (event.parameters.isNotEmpty()) {
+            ObjectGenerator.create(
+                constructorFileSpec,
+                eventListenerName,
+                namespace,
+                event
+            )
+            ClassName("browser.${namespace}", eventListenerName)
+        } else {
+            ClassName("kotlin", "Nothing")
+        }
 
         val returnType = if (event.name.equals("onMessage", true) || event.name.equals("onMessageExternal", true)) {
             Any::class.asTypeName().copy(nullable = true)
@@ -56,7 +61,7 @@ object EventGenerator {
             .initializer("definedExternally")
             .apply {
                 if (!event.description.isNullOrEmpty()) {
-                    addKdoc(event.description)
+                    addKdoc(event.description.escapeForKdoc())
                 }
             }.build()
 
@@ -67,7 +72,7 @@ object EventGenerator {
             .addModifiers(KModifier.EXTERNAL)
             .apply {
                 if (!event.description.isNullOrEmpty()) {
-                    addKdoc(event.description)
+                    addKdoc(event.description.escapeForKdoc())
                 }
             }.build()
         )

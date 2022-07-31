@@ -2,6 +2,7 @@ package generator
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import common.escapeForKdoc
 import common.getAsClassName
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
@@ -30,6 +31,8 @@ object ArrayAliasGenerator {
                 description,
                 properties,
                 additionalProperties,
+                emptyList(),
+                emptyList(),
                 emptyList()
             )
             ClassName("browser.${namespace}", propertyName)
@@ -39,7 +42,7 @@ object ArrayAliasGenerator {
             TypeAliasSpec.builder(name, Array::class.asClassName().parameterizedBy(typeName))
                 .apply {
                     if (!description.isNullOrEmpty()) {
-                        addKdoc(description)
+                        addKdoc(description.escapeForKdoc())
                     }
                 }
                 .build()
