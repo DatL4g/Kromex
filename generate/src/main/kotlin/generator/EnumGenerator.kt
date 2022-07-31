@@ -13,16 +13,6 @@ object EnumGenerator {
         values: List<String>
     ) {
         val enumFileBuilder = FileSpec.builder("browser.${namespace}", name)
-            .addAnnotation(
-                AnnotationGenerator.POLYFILL_ANNOTATION
-            )
-            .addAnnotation(
-                AnnotationGenerator.QUALIFIER_ANNOTATION(namespace)
-            )
-            .addKotlinDefaultImports(
-                includeJvm = false,
-                includeJs = true
-            )
 
         val typeSpec = TypeSpec.enumBuilder(name)
             .primaryConstructor(

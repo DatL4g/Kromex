@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 data class ExtensionFunctionReturn(
     @SerialName("name") val name: String? = null,
+    @SerialName("\$ref") val ref: String? = null,
     @SerialName("parameters") val parameters: List<ExtensionFunctionParameter> = listOf(),
     @SerialName("optional") val optional: Boolean = false,
     @SerialName("description") val description: String? = null,

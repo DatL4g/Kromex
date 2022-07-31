@@ -7,9 +7,7 @@ import getAssociatedInstance
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import model.ExtensionFunctionParameter
-import model.ExtensionProperty
-import model.ExtensionType
+import model.*
 import utils.Constants
 
 object ObjectGenerator {
@@ -31,35 +29,39 @@ object ObjectGenerator {
             )
             .addKotlinDefaultImports(
                 includeJvm = false,
-                includeJs = true
+                includeJs = false
             )
 
-        val typeSpec = TypeSpec.interfaceBuilder(name)
-            .addModifiers(KModifier.EXTERNAL)
-            .apply {
-                if (!isInstanceOf.isNullOrEmpty()) {
-                    addSuperinterface(getAssociatedInstance(isInstanceOf))
-                }
-                if (!description.isNullOrEmpty()) {
-                    addKdoc(description)
-                }
-                if (properties.isEmpty() && isInstanceOf.isNullOrEmpty()) {
-                    val typeData = additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
-                    val typeName = typeData.getAsClassName(emptyList(), false) {
-                        Any::class.asTypeName()
-                    } ?: Any::class.asTypeName()
-                    addSuperinterface(typeName)
-                } else {
-                    properties.forEach { (t, u) ->
-                        addProperty(
-                            this,
-                            t,
-                            namespace,
-                            u
-                        )
-                    }
+        val typeSpec = if (!isInstanceOf.isNullOrEmpty()) {
+            TypeSpec.classBuilder(name)
+                .addModifiers(KModifier.ABSTRACT, KModifier.EXTERNAL)
+                .addSuperinterface(getAssociatedInstance(isInstanceOf))
+        } else {
+            TypeSpec.interfaceBuilder(name)
+                .addModifiers(KModifier.EXTERNAL)
+        }
+
+        typeSpec.apply {
+            if (!description.isNullOrEmpty()) {
+                addKdoc(description)
+            }
+            if (properties.isEmpty() && isInstanceOf.isNullOrEmpty()) {
+                val typeData = additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
+                val typeName = typeData.getAsClassName(emptyList(), false) {
+                    Any::class.asTypeName()
+                } ?: Any::class.asTypeName()
+                addSuperinterface(typeName)
+            } else {
+                properties.forEach { (t, u) ->
+                    addProperty(
+                        this,
+                        t,
+                        namespace,
+                        u
+                    )
                 }
             }
+        }
 
         objectFileBuilder.addType(typeSpec.build())
         objectFileBuilder.build().writeTo(Constants.outputDir)
@@ -90,33 +92,90 @@ object ObjectGenerator {
         extensionFunctionParameter.additionalProperties
     )
 
+    fun create(
+        name: String,
+        namespace: String,
+        params: List<ExtensionFunctionParameter>
+    ) = create(
+        name,
+        namespace,
+        null,
+        null,
+        params.associate { it.name to ExtensionProperty(it.type, it.ref, it.description, it.optional, it._properties, it.parameters) },
+        null
+    )
+
+    fun create(
+        name: String,
+        namespace: String,
+        extensionFunctionReturn: ExtensionFunctionReturn
+    ) = create(
+        name,
+        namespace,
+        null,
+        extensionFunctionReturn.description,
+        extensionFunctionReturn.properties,
+        extensionFunctionReturn.additionalProperties
+    )
+
     private fun createProperty(
+        importFileSpec: FileSpec.Builder?,
+        typeSpecBuilder: TypeSpec.Builder?,
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
-    ): PropertySpec {
+    ) {
+        require(importFileSpec != null || typeSpecBuilder != null) {
+            "Either file or typeSpec must be provided"
+        }
+
         val typeName = extensionProperty.type.getAsClassName(extensionProperty.choices, extensionProperty.optional) {
             createNestedInterface(
                 name,
                 namespace,
                 extensionProperty
             )
-        } ?: extensionProperty.ref.getFromReference(namespace, extensionProperty.optional) ?: Any::class.asTypeName()
-
-        return PropertySpec.builder(name, typeName, KModifier.EXTERNAL)
-            .apply {
-                if (!extensionProperty.description.isNullOrEmpty()) {
-                    addKdoc(extensionProperty.description)
-                }
-                if (!extensionProperty.deprecated.isNullOrEmpty()) {
-                    addAnnotation(
-                        AnnotationSpec.builder(Deprecated::class)
-                            .addMember("message = %S", extensionProperty.deprecated)
-                            .addMember("level = %M", DeprecationLevel.WARNING)
-                            .build()
+        } ?: extensionProperty.ref.getFromReference(namespace, extensionProperty.optional) ?: run {
+            if (extensionProperty.type.equals("function", true)) {
+                FunctionGenerator.create(
+                    importFileSpec,
+                    typeSpecBuilder,
+                    namespace,
+                    ExtensionFunction(
+                        name,
+                        extensionProperty.type ?: "function",
+                        extensionProperty.description,
+                        extensionProperty.parameters,
+                        null,
+                        null,
+                        extensionProperty.deprecated
                     )
-                }
-            }.build()
+                )
+                null
+            } else {
+                Any::class.asTypeName()
+            }
+        }
+
+        if (typeName != null) {
+            val property = PropertySpec.builder(name, typeName, KModifier.EXTERNAL)
+                .apply {
+                    if (!extensionProperty.description.isNullOrEmpty()) {
+                        addKdoc(extensionProperty.description)
+                    }
+                    if (!extensionProperty.deprecated.isNullOrEmpty()) {
+                        addAnnotation(
+                            AnnotationSpec.builder(Deprecated::class)
+                                .addMember("message = %S", extensionProperty.deprecated)
+                                .addMember("level = %M", DeprecationLevel.WARNING)
+                                .build()
+                        )
+                    }
+                }.build()
+
+            importFileSpec?.addProperty(property)
+            typeSpecBuilder?.addProperty(property)
+        }
     }
 
     private fun addProperty(
@@ -124,14 +183,14 @@ object ObjectGenerator {
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
-    ) = objectSpecBuilder.addProperty(createProperty(name, namespace, extensionProperty))
+    ) = createProperty(null, objectSpecBuilder, name, namespace, extensionProperty)
 
     fun addProperty(
         importFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
-    ) = importFileSpec.addProperty(createProperty(name, namespace, extensionProperty))
+    ) = createProperty(importFileSpec, null, name, namespace, extensionProperty)
 
     private fun createNestedInterface(
         name: String,
@@ -147,7 +206,7 @@ object ObjectGenerator {
             .addAnnotation(AnnotationGenerator.QUALIFIER_ANNOTATION(namespace))
             .addKotlinDefaultImports(
                 includeJvm = false,
-                includeJs = true
+                includeJs = false
             )
 
         val propertyTypeSpec = TypeSpec.interfaceBuilder(propertyClass)

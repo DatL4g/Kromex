@@ -4,37 +4,37 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import common.getAsClassName
 import common.getFromReference
+import common.normalizeNullable
+import common.nullOrEmpty
 import getAssociatedInstance
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import model.ExtensionFunction
 import model.ExtensionFunctionParameter
-import model.ExtensionProperty
+import model.ReturnInfo
 
 object FunctionGenerator {
 
     fun create(
-        importFileSpec: FileSpec.Builder,
-        name: String,
+        importFileSpec: FileSpec.Builder?,
+        typeSpecBuilder: TypeSpec.Builder?,
         namespace: String,
-        description: String?,
-        parameters: List<ExtensionFunctionParameter>,
-        returnType: String?,
-        returnDescription: String?,
-        returnOptional: Boolean,
-        returnProperties: Map<String, ExtensionProperty>,
-        returnParameters: List<ExtensionFunctionParameter>,
-        returnAdditionalProperties: JsonElement?,
-        isPromise: Boolean
+        extensionFunction: ExtensionFunction,
     ) {
+        require(importFileSpec != null || typeSpecBuilder != null) {
+            "Either file or typeSpec must be provided"
+        }
+
+        val returnInfo = get(namespace, extensionFunction)
+        val name = extensionFunction.name
+
         val funSpec = FunSpec.builder(name)
             .addModifiers(KModifier.EXTERNAL)
             .apply {
-                if (!description.isNullOrEmpty()) {
-                    addKdoc(description)
+                if (!extensionFunction.description.isNullOrEmpty()) {
+                    addKdoc(extensionFunction.description)
                 }
-                parameters.forEach {
+                extensionFunction.parameters.forEach {
                     if (!it.isCallback) {
                         val typeName = it.type.getAsClassName(emptyList(), it.optional) {
                             val propertyName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}${it.name.replaceFirstChar { char -> char.uppercaseChar() }}"
@@ -66,116 +66,155 @@ object FunctionGenerator {
                     }
                 }
 
-                val returnTypeName = createReturnType(
-                    name,
-                    namespace,
-                    returnType,
-                    returnDescription,
-                    returnOptional,
-                    returnProperties,
-                    returnParameters,
-                    returnAdditionalProperties
-                )
-
-                if (isPromise) {
-                    returns(ClassName("kotlin.js", "Promise").parameterizedBy(returnTypeName))
+                if (returnInfo.isPromise) {
+                    returns(
+                        ClassName("kotlin.js", "Promise").parameterizedBy(returnInfo.returnType).normalizeNullable(returnInfo.returnIsOptional),
+                        returnInfo.description?.let { CodeBlock.of(it) } ?: CodeBlock.of(String())
+                    )
                 } else {
-                    returns(returnTypeName)
+                    returns(
+                        returnInfo.returnType.normalizeNullable(returnInfo.returnIsOptional),
+                        returnInfo.description?.let { CodeBlock.of(it) } ?: CodeBlock.of(String())
+                    )
                 }
-            }
+            }.build()
 
-        importFileSpec.addFunction(funSpec.build())
+        importFileSpec?.addFunction(funSpec)
+        typeSpecBuilder?.addFunction(funSpec)
     }
 
     fun create(
-        importFileSpec: FileSpec.Builder,
+        typeSpecBuilder: TypeSpec.Builder,
         namespace: String,
         extensionFunction: ExtensionFunction,
-    ) = create(
-        importFileSpec,
-        extensionFunction.name,
-        namespace,
-        extensionFunction.description,
-        extensionFunction.parameters,
-        extensionFunction.returnData?.type,
-        extensionFunction.returnData?.description,
-        extensionFunction.returnData?.optional ?: false,
-        extensionFunction.returnData?.properties ?: emptyMap(),
-        extensionFunction.returnData?.parameters ?: emptyList(),
-        extensionFunction.returnData?.additionalProperties,
-        extensionFunction.returnPromise
-    )
+    ) = create(null, typeSpecBuilder, namespace, extensionFunction)
 
-    private fun createReturnType(
-        name: String,
+    fun create(
+        importFileSpec: FileSpec.Builder?,
         namespace: String,
-        type: String?,
-        description: String?,
-        optional: Boolean,
-        properties: Map<String, ExtensionProperty>,
-        parameters: List<ExtensionFunctionParameter>,
-        additionalProperties: JsonElement?
-    ): TypeName {
-        return type.getAsClassName(
-            emptyList(),
-            optional
-        ) {
-            /**
-            if (`object` is ExtensionFunctionParameter) {
-                if (!`object`.isInstanceOf.isNullOrEmpty()) {
-                    getAssociatedInstance(`object`.isInstanceOf).copy(nullable = optional)
-                } else {
-                    null
-                }
-            } else {
-                null
-            } ?: if (properties.isEmpty()) {
-                val typeData = additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
-                typeData.getAsClassName(null, emptyList(), emptyList(), optional, namespace) {
-                    ClassName("kotlin", "Any").copy(nullable = optional)
-                }
-            } else {
-                val propertyName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+        extensionFunction: ExtensionFunction,
+    ) = create(importFileSpec, null, namespace, extensionFunction)
 
+    fun get(
+        namespace: String,
+        extensionFunction: ExtensionFunction
+    ): ReturnInfo {
+        val nothing = ClassName("kotlin", "Nothing")
+        val hasReturnData = extensionFunction.returnsAsync != null || extensionFunction.returns != null || extensionFunction.parameters.any { it.isCallback }
+
+        if (!hasReturnData) {
+            return ReturnInfo(false, nothing, false, null)
+        }
+
+        val isPromise = extensionFunction.returnsAsync != null
+                || (extensionFunction.returns != null && extensionFunction.returns.isCallback)
+                || extensionFunction.parameters.any { it.isCallback }
+
+        val returnData = extensionFunction.returnsAsync ?: extensionFunction.returns
+
+        val returnParam = returnData?.type.getAsClassName(emptyList(), returnData?.optional ?: false) {
+            if (returnData!!.properties.isEmpty()) {
+                val additionalType = returnData.additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
+                additionalType.getAsClassName(emptyList(), returnData.optional) {
+                    Any::class.asTypeName()
+                } ?: Any::class.asTypeName()
+            } else {
+                val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                 ObjectGenerator.create(
-                    propertyName,
+                    returnName,
                     namespace,
-                    null,
-                    description,
-                    properties,
-                    additionalProperties
+                    returnData
                 )
-
-                ClassName("browser.${namespace}", propertyName)
+                ClassName("browser.${namespace}", returnName)
             }
-            */
-            createReturnTypeFromParameter(
-                name, namespace, parameters
-            )
-        } ?: createReturnTypeFromParameter(
-            name, namespace, parameters
+        } ?: run {
+            val returnRef = returnData?.ref.getFromReference(namespace, returnData?.optional ?: false)
+
+            returnRef ?: run {
+                getFromParameters(
+                    returnData?.parameters.nullOrEmpty(extensionFunction.parameters.findLast { it.isCallback }?.parameters).toList(),
+                    onListEmpty = {
+                        val callbackParam = extensionFunction.parameters.findLast { it.isCallback }
+
+                        if (callbackParam != null) {
+                            callbackParam.type.getAsClassName(emptyList(), callbackParam.optional) {
+                                val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                                ObjectGenerator.create(
+                                    returnName,
+                                    namespace,
+                                    callbackParam
+                                )
+                                ClassName("browser.${namespace}", returnName)
+                            } ?: run {
+                                callbackParam.ref.getFromReference(namespace, callbackParam.optional) ?: nothing
+                            }
+                        } else {
+                            nothing
+                        }
+                    },
+                    onNoProperties = {
+                        it.type.getAsClassName(emptyList(), it.optional) {
+                            val additionalType = it.additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
+                            additionalType.getAsClassName(emptyList(), it.optional) {
+                                Any::class.asTypeName()
+                            } ?: Any::class.asTypeName()
+                        } ?: run {
+                            it.ref.getFromReference(namespace, it.optional) ?: Any::class.asTypeName()
+                        }
+                    },
+                    onMultipleProperties = {
+                        it.type.getAsClassName(emptyList(), it.optional) {
+                            val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                            ObjectGenerator.create(returnName, namespace, it)
+                            ClassName("browser.${namespace}", returnName)
+                        } ?: Any::class.asTypeName()
+                    },
+                    onMultipleParams = {
+                        val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                        ObjectGenerator.create(
+                            returnName,
+                            namespace,
+                            it
+                        )
+                        ClassName("browser.${namespace}", returnName)
+                    }
+                )
+            }
+        }
+
+        return ReturnInfo(
+            isPromise,
+            returnParam,
+            returnData?.optional ?: false,
+            returnData?.description ?: extensionFunction.parameters.findLast { it.isCallback }?.description
         )
     }
 
-    private fun createReturnTypeFromParameter(
-        name: String,
-        namespace: String,
-        parameters: List<ExtensionFunctionParameter>
+    private fun getFromParameters(
+        list: List<ExtensionFunctionParameter>,
+        onListEmpty: () -> TypeName,
+        onNoProperties: (ExtensionFunctionParameter) -> TypeName,
+        onMultipleProperties: (ExtensionFunctionParameter) -> TypeName,
+        onMultipleParams: (List<ExtensionFunctionParameter>) -> TypeName
     ): TypeName {
-        return if (parameters.isEmpty()) {
-            ClassName("kotlin", "Nothing")
-        } else if (parameters.size == 1) {
-            parameters[0].type?.getAsClassName(emptyList(), parameters[0].optional) {
-                val propertyName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
-                ObjectGenerator.create(
-                    propertyName,
-                    namespace,
-                    parameters[0]
-                )
-                ClassName("browser.${namespace}", propertyName)
-            } ?: parameters[0].ref.getFromReference(namespace, parameters[0].optional) ?: Any::class.asTypeName()
+        return if (list.isNotEmpty()) {
+            if (list.size == 1) {
+                val param = list[0]
+
+                if (param.properties.isEmpty()) {
+                    if (!param.isInstanceOf.isNullOrEmpty()) {
+                        getAssociatedInstance(param.isInstanceOf).normalizeNullable(param.optional)
+                    } else {
+                        onNoProperties.invoke(param)
+                    }
+                } else {
+                    onMultipleProperties.invoke(param)
+                }
+            } else {
+                onMultipleParams.invoke(list)
+            }
         } else {
-            ClassName("", "ToDoReturnType")
+            onListEmpty.invoke()
         }
     }
 }

@@ -7,7 +7,7 @@ import utils.Constants
 
 
 abstract class PropertiesHolder{
-    protected open val _properties: JsonElement? = null
+    internal open val _properties: JsonElement? = null
 
     val properties: Map<String, ExtensionProperty>
         get() {

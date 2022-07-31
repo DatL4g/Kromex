@@ -8,7 +8,7 @@ object ConstructorFileGenerator {
         return FileSpec.builder("browser.${namespace}", "Constructor")
             .addKotlinDefaultImports(
                 includeJvm = false,
-                includeJs = true
+                includeJs = false
             )
     }
 }

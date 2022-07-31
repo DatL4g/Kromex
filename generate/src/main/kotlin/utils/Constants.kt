@@ -11,7 +11,7 @@ object Constants {
         ignoreUnknownKeys = true
     }
 
-    val testDir = File("./src/main/kotlin/")
+    val testDir = File("./../popup/src/main/kotlin/")
     val outputDir = testDir
 
     const val KROMEX =

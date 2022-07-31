@@ -1,9 +1,6 @@
 package common
 
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.*
 
 fun TypeSpec.Builder.primaryConstructor(vararg properties: PropertySpec): TypeSpec.Builder {
     val propertySpecs = properties.map { p -> p.toBuilder().initializer(p.name).build() }
@@ -15,4 +12,13 @@ fun TypeSpec.Builder.primaryConstructor(vararg properties: PropertySpec): TypeSp
     return this
         .primaryConstructor(constructor)
         .addProperties(propertySpecs)
+}
+
+fun TypeName.normalizeNullable(optional: Boolean): TypeName {
+    val nothing = ClassName("kotlin", "Nothing")
+    return if (this == Void::class.asTypeName() || this == Void::class.asTypeName().copy(nullable = true) || this == nothing.copy(nullable = true)) {
+        nothing
+    } else {
+        this.copy(nullable = optional)
+    }
 }

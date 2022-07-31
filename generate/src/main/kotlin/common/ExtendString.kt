@@ -41,12 +41,9 @@ fun String?.getAsClassName(
         isBoolean -> Boolean::class.asTypeName()
         isObject -> onIsObject()
         else -> null
-    }?.copy(nullable = optional)
+    }?.normalizeNullable(optional)
 
-    val nothing = ClassName("kotlin", "Nothing")
-    return if (typeName == Void::class.asTypeName() || typeName == Void::class.asTypeName().copy(nullable = true)) {
-        nothing
-    } else if (isChoices) {
+    return if (isChoices) {
         Any::class.asTypeName()
     } else {
         typeName
@@ -66,6 +63,6 @@ fun String?.getFromReference(
         } else {
             this.substringBeforeLast('.')
         }}"
-        ClassName(packageName, this.substringAfterLast('.')).copy(nullable = optional)
+        ClassName(packageName, this.substringAfterLast('.')).normalizeNullable(optional)
     }
 }

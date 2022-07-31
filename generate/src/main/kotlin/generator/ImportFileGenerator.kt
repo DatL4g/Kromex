@@ -14,7 +14,7 @@ object ImportFileGenerator {
             )
             .addKotlinDefaultImports(
                 includeJvm = false,
-                includeJs = true
+                includeJs = false
             )
     }
 }

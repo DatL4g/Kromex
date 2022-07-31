@@ -12,10 +12,4 @@ data class ExtensionFunction(
     @SerialName("returns") val returns: ExtensionFunctionReturn? = null,
     @SerialName("returns_async") val returnsAsync: ExtensionFunctionReturn? = null,
     @SerialName("deprecated") val deprecated: String? = null
-) {
-    val returnPromise: Boolean
-        get() = returnsAsync != null || (returns != null && returns.isCallback) || parameters.any { it.isCallback }
-
-    val returnData: ExtensionFunctionReturn?
-        get() = returns ?: returnsAsync
-}
+)

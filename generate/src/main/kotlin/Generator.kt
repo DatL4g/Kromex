@@ -197,6 +197,8 @@ fun getAssociatedInstance(isInstanceOf: String): TypeName {
         ClassName("org.w3c.dom", isInstanceOf)
     } else if (isInstanceOf.equals("Window", true)) {
         ClassName("org.w3c.dom", isInstanceOf)
+    } else if (isInstanceOf.equals("DirectoryEntry", true)) {
+        Any::class.asTypeName()
     } else {
         ClassName("", isInstanceOf)
     }
