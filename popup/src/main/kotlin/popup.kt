@@ -3,6 +3,7 @@ import browser.tabs.QueryInfo
 import common.collect
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlin.js.Promise
 
 fun main() {
     browser.action.setBadgeText(BadgeDetails {

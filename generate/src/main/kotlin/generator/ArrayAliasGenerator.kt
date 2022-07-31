@@ -28,7 +28,8 @@ object ArrayAliasGenerator {
                 null,
                 description,
                 properties,
-                additionalProperties
+                additionalProperties,
+                emptyList()
             )
             ClassName("browser.${namespace}", propertyName)
         } ?: Any::class.asTypeName()

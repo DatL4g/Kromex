@@ -13,5 +13,6 @@ data class ExtensionProperty(
     @SerialName("properties") override val _properties: JsonElement? = null,
     @SerialName("parameters") val parameters: List<ExtensionFunctionParameter> = listOf(),
     @SerialName("deprecated") val deprecated: String? = null,
-    @SerialName("choices") val choices: List<ExtensionPropertyChoice> = listOf()
+    @SerialName("choices") val choices: List<ExtensionPropertyChoice> = listOf(),
+    @SerialName("items") val items: ExtensionPropertyItem? = null
 ): PropertiesHolder()

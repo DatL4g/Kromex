@@ -12,7 +12,7 @@ data class ExtensionType(
     @SerialName("isInstanceOf") val isInstanceOf: String? = null,
     @SerialName("description") val description: String? = null,
     @SerialName("properties") override val _properties: JsonElement? = null,
-    @SerialName("events") val events: List<JsonElement> = listOf(),
+    @SerialName("events") val events: List<ExtensionEvent> = listOf(),
     @SerialName("enum") val enum: List<String> = listOf(),
     @SerialName("additionalProperties") val additionalProperties: JsonElement? = null,
 ): PropertiesHolder() {

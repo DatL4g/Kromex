@@ -34,11 +34,10 @@ fun main(vararg args: String) {
     }
 
     val sourceList = listOf<String>(
+        "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/events.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/browser_action.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/runtime.json?format=TEXT"
     )
-
-    generateEventSource()
 
     runBlocking {
         sourceList.forEach { source ->
@@ -48,11 +47,6 @@ fun main(vararg args: String) {
             retrieveSource(source, client)
         }
     }
-}
-
-// This is handled separately because events are a little special.
-private fun generateEventSource() {
-
 }
 
 private suspend fun retrieveSource(source: String, client: HttpClient) {
@@ -185,6 +179,15 @@ private fun generateFile(
 
     if (extension.functions.isNotEmpty()) {
         println("Generated all functions".color(ConsoleColors.GREEN).emoji(ConsoleEmojis.CHECK_MARK))
+    }
+
+    extension.events.forEachIndexed { index, extensionEvent ->
+        EventGenerator.create(
+            importFileSpec,
+            null,
+            extension.namespace,
+            extensionEvent
+        )
     }
 
     importFileSpec.build().writeTo(Constants.outputDir)

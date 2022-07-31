@@ -21,10 +21,25 @@ object ExtensionTypeGenerator {
                 namespace,
                 extensionType
             )
-            else -> ObjectGenerator.create(
-                namespace,
-                extensionType
-            )
+            else -> {
+                if (namespace.equals("events", true)) {
+                    if (extensionType.id.equals("Rule", true)) {
+                        EventSourceGenerator.createRule()
+                    } else if (extensionType.id.equals("Event", true)) {
+                        EventSourceGenerator.createEvent()
+                    } else {
+                        ObjectGenerator.create(
+                            namespace,
+                            extensionType
+                        )
+                    }
+                } else {
+                    ObjectGenerator.create(
+                        namespace,
+                        extensionType
+                    )
+                }
+            }
         }
     }
 }

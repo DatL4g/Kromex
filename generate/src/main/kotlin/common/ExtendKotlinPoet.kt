@@ -22,3 +22,12 @@ fun TypeName.normalizeNullable(optional: Boolean): TypeName {
         this.copy(nullable = optional)
     }
 }
+
+fun TypeName.normalizeNothingToUnit(): TypeName {
+    val nothing = ClassName("kotlin", "Nothing")
+    return if (this == Void::class.asTypeName() || this == Void::class.asTypeName().copy(nullable = true) || this == nothing || this == nothing.copy(nullable = true)) {
+        Unit::class.asTypeName()
+    } else {
+        this
+    }.copy(nullable = this.isNullable)
+}

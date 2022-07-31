@@ -1,8 +1,10 @@
 package generator
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import common.getAsClassName
 import common.getFromReference
+import common.normalizeNullable
 import getAssociatedInstance
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
@@ -18,7 +20,8 @@ object ObjectGenerator {
         isInstanceOf: String?,
         description: String?,
         properties: Map<String, ExtensionProperty>,
-        additionalProperties: JsonElement?
+        additionalProperties: JsonElement?,
+        events: List<ExtensionEvent>
     ) {
         val objectFileBuilder = FileSpec.builder("browser.${namespace}", name)
             .addAnnotation(
@@ -63,6 +66,10 @@ object ObjectGenerator {
             }
         }
 
+        events.forEach {
+            EventGenerator.create(null, typeSpec, namespace, it)
+        }
+
         objectFileBuilder.addType(typeSpec.build())
         objectFileBuilder.build().writeTo(Constants.outputDir)
     }
@@ -76,7 +83,8 @@ object ObjectGenerator {
         extensionType.isInstanceOf,
         extensionType.description,
         extensionType.properties,
-        extensionType.additionalProperties
+        extensionType.additionalProperties,
+        extensionType.events
     )
 
     fun create(
@@ -89,7 +97,8 @@ object ObjectGenerator {
         extensionFunctionParameter.isInstanceOf,
         extensionFunctionParameter.description,
         extensionFunctionParameter.properties,
-        extensionFunctionParameter.additionalProperties
+        extensionFunctionParameter.additionalProperties,
+        emptyList()
     )
 
     fun create(
@@ -102,7 +111,8 @@ object ObjectGenerator {
         null,
         null,
         params.associate { it.name to ExtensionProperty(it.type, it.ref, it.description, it.optional, it._properties, it.parameters) },
-        null
+        null,
+        emptyList()
     )
 
     fun create(
@@ -115,7 +125,22 @@ object ObjectGenerator {
         null,
         extensionFunctionReturn.description,
         extensionFunctionReturn.properties,
-        extensionFunctionReturn.additionalProperties
+        extensionFunctionReturn.additionalProperties,
+        emptyList()
+    )
+
+    fun create(
+        name: String,
+        namespace: String,
+        extensionEvent: ExtensionEvent
+    ) = create(
+        name,
+        namespace,
+        null,
+        extensionEvent.description,
+        extensionEvent.parameters.associate { it.name to ExtensionProperty(it.type, it.ref, it.description, it.optional, it._properties, it.parameters) },
+        null,
+        emptyList()
     )
 
     private fun createProperty(
@@ -152,10 +177,19 @@ object ObjectGenerator {
                     )
                 )
                 null
+            } else if (extensionProperty.type.equals("array", true)) {
+                val arrayType = extensionProperty.items?.type.getAsClassName(extensionProperty.items?.choices ?: emptyList(), false) {
+                    createNestedInterface(
+                        name,
+                        namespace,
+                        extensionProperty
+                    )
+                } ?: Any::class.asTypeName()
+                Array::class.asTypeName().parameterizedBy(arrayType)
             } else {
                 Any::class.asTypeName()
             }
-        }
+        }?.normalizeNullable(extensionProperty.optional)
 
         if (typeName != null) {
             val property = PropertySpec.builder(name, typeName, KModifier.EXTERNAL)

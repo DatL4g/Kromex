@@ -10,5 +10,6 @@ data class ExtensionJson(
     @SerialName("description") val description: String? = null,
     @SerialName("types") val types: List<ExtensionType> = listOf(),
     @SerialName("properties") override val _properties: JsonElement? = null,
-    @SerialName("functions") val functions: List<ExtensionFunction> = listOf()
+    @SerialName("functions") val functions: List<ExtensionFunction> = listOf(),
+    @SerialName("events") val events: List<ExtensionEvent> = listOf()
 ) : PropertiesHolder()

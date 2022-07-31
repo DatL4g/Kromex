@@ -11,6 +11,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import model.ExtensionFunction
 import model.ExtensionFunctionParameter
+import model.ExtensionFunctionReturn
 import model.ReturnInfo
 
 object FunctionGenerator {
@@ -25,7 +26,7 @@ object FunctionGenerator {
             "Either file or typeSpec must be provided"
         }
 
-        val returnInfo = get(namespace, extensionFunction)
+        val returnInfo = getReturnInfo(namespace, extensionFunction)
         val name = extensionFunction.name
 
         val funSpec = FunSpec.builder(name)
@@ -45,7 +46,8 @@ object FunctionGenerator {
                                 null,
                                 it.description,
                                 it.properties,
-                                null
+                                null,
+                                emptyList()
                             )
 
                             ClassName("browser.${namespace}", propertyName)
@@ -95,22 +97,36 @@ object FunctionGenerator {
         extensionFunction: ExtensionFunction,
     ) = create(importFileSpec, null, namespace, extensionFunction)
 
-    fun get(
+    private fun getReturnInfo(
         namespace: String,
         extensionFunction: ExtensionFunction
+    ) = getReturnInfo(
+        extensionFunction.name,
+        namespace,
+        extensionFunction.returnsAsync,
+        extensionFunction.returns,
+        extensionFunction.parameters
+    )
+
+    fun getReturnInfo(
+        name: String,
+        namespace: String,
+        returnsAsync: ExtensionFunctionReturn?,
+        returns: ExtensionFunctionReturn?,
+        parameters: List<ExtensionFunctionParameter>
     ): ReturnInfo {
         val nothing = ClassName("kotlin", "Nothing")
-        val hasReturnData = extensionFunction.returnsAsync != null || extensionFunction.returns != null || extensionFunction.parameters.any { it.isCallback }
+        val hasReturnData = returnsAsync != null || returns != null || parameters.any { it.isCallback }
 
         if (!hasReturnData) {
             return ReturnInfo(false, nothing, false, null)
         }
 
-        val isPromise = extensionFunction.returnsAsync != null
-                || (extensionFunction.returns != null && extensionFunction.returns.isCallback)
-                || extensionFunction.parameters.any { it.isCallback }
+        val isPromise = returnsAsync != null
+                || (returns != null && returns.isCallback)
+                || parameters.any { it.isCallback }
 
-        val returnData = extensionFunction.returnsAsync ?: extensionFunction.returns
+        val returnData = returnsAsync ?: returns
 
         val returnParam = returnData?.type.getAsClassName(emptyList(), returnData?.optional ?: false) {
             if (returnData!!.properties.isEmpty()) {
@@ -119,7 +135,7 @@ object FunctionGenerator {
                     Any::class.asTypeName()
                 } ?: Any::class.asTypeName()
             } else {
-                val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                 ObjectGenerator.create(
                     returnName,
                     namespace,
@@ -132,13 +148,13 @@ object FunctionGenerator {
 
             returnRef ?: run {
                 getFromParameters(
-                    returnData?.parameters.nullOrEmpty(extensionFunction.parameters.findLast { it.isCallback }?.parameters).toList(),
+                    returnData?.parameters.nullOrEmpty(parameters.findLast { it.isCallback }?.parameters).toList(),
                     onListEmpty = {
-                        val callbackParam = extensionFunction.parameters.findLast { it.isCallback }
+                        val callbackParam = parameters.findLast { it.isCallback }
 
                         if (callbackParam != null) {
                             callbackParam.type.getAsClassName(emptyList(), callbackParam.optional) {
-                                val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                                val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                                 ObjectGenerator.create(
                                     returnName,
                                     namespace,
@@ -164,13 +180,13 @@ object FunctionGenerator {
                     },
                     onMultipleProperties = {
                         it.type.getAsClassName(emptyList(), it.optional) {
-                            val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                            val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                             ObjectGenerator.create(returnName, namespace, it)
                             ClassName("browser.${namespace}", returnName)
                         } ?: Any::class.asTypeName()
                     },
                     onMultipleParams = {
-                        val returnName = "${extensionFunction.name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
+                        val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                         ObjectGenerator.create(
                             returnName,
                             namespace,
@@ -186,7 +202,7 @@ object FunctionGenerator {
             isPromise,
             returnParam,
             returnData?.optional ?: false,
-            returnData?.description ?: extensionFunction.parameters.findLast { it.isCallback }?.description
+            returnData?.description ?: parameters.findLast { it.isCallback }?.description
         )
     }
 

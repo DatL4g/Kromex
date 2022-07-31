@@ -4,8 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ExtensionPropertyChoice(
+data class ExtensionPropertyItem(
     @SerialName("type") val type: String? = null,
-    @SerialName("\$ref") val ref: String? = null,
-    @SerialName("items") val items: ExtensionPropertyItem? = null
+    @SerialName("choices") val choices: List<ExtensionPropertyChoice> = listOf()
 )

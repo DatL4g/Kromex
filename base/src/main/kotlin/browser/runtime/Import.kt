@@ -247,7 +247,7 @@ external val onMessage: Event<OnMessageListener?, Any> = definedExternally
  * Fired when a message is sent from another extension/app (by runtime.sendMessage).
  * Cannot be used in a content script.
  */
-external val onMessageExternal: Event<OnMessageListener?, Any> = definedExternally
+//external val onMessageExternal: Event<OnMessageListener?, Any> = definedExternally
 
 /**
  * Fired when an app or the device that it runs on needs to be restarted.
