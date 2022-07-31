@@ -23,6 +23,7 @@ object ArrayAliasGenerator {
         val typeName = type.getAsClassName(emptyList(), false) {
             val propertyName = "${name}AliasProperty"
             ObjectGenerator.create(
+                constructorFileSpec,
                 propertyName,
                 namespace,
                 null,

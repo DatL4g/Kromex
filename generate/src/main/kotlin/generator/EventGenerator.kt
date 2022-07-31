@@ -11,6 +11,7 @@ object EventGenerator {
     fun create(
         importFileSpec: FileSpec.Builder? = null,
         typeSpecBuilder: TypeSpec.Builder? = null,
+        constructorFileSpec: FileSpec.Builder,
         namespace: String,
         event: ExtensionEvent
     ) {
@@ -22,6 +23,7 @@ object EventGenerator {
         val eventListenerName = "${event.name.replaceFirstChar { char -> char.uppercaseChar() }}Listener"
 
         ObjectGenerator.create(
+            constructorFileSpec,
             eventListenerName,
             namespace,
             event
@@ -32,6 +34,7 @@ object EventGenerator {
             Any::class.asTypeName().copy(nullable = true)
         } else {
             val returnInfo = FunctionGenerator.getReturnInfo(
+                constructorFileSpec,
                 event.name,
                 namespace,
                 null,

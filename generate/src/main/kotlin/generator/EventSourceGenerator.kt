@@ -9,7 +9,7 @@ object EventSourceGenerator {
 
     private const val namespace = "events"
 
-    fun createRule() {
+    fun createRule(constructorFileSpec: FileSpec.Builder) {
         val ruleFile = FileSpec.builder("browser.${namespace}", "Rule")
             .addAnnotation(AnnotationGenerator.POLYFILL_ANNOTATION)
             .addAnnotation(AnnotationGenerator.QUALIFIER_ANNOTATION(namespace))
@@ -24,32 +24,56 @@ object EventSourceGenerator {
             .addKdoc("Description of a declarative rule for handling events.")
             .addProperty(
                 PropertySpec.builder("id", String::class.asTypeName().normalizeNullable(true))
-                .addKdoc("Optional identifier that allows referencing this rule.")
+                    .mutable()
+                    .addKdoc("Optional identifier that allows referencing this rule.")
                     .build()
             )
             .addProperty(
                 PropertySpec.builder("tags", Array::class.parameterizedBy(String::class).normalizeNullable(true))
+                    .mutable()
                     .addKdoc("Tags can be used to annotate rules and perform operations on sets of rules.")
                     .build()
             )
             .addProperty(
                 PropertySpec.builder("conditions", Array::class.asTypeName().parameterizedBy(conditionType))
+                    .mutable()
                     .addKdoc("List of conditions that can trigger the actions.")
                     .build()
             )
             .addProperty(
                 PropertySpec.builder("actions", Array::class.asTypeName().parameterizedBy(actionType))
+                    .mutable()
                     .addKdoc("List of actions that are triggered if one of the conditions is fulfilled.")
                     .build()
             )
             .addProperty(
                 PropertySpec.builder("priority", Int::class.asTypeName().normalizeNullable(true))
+                    .mutable()
                     .addKdoc("Optional identifier that allows referencing this rule.")
                     .build()
             ).build()
 
         ruleFile.addType(ruleInterface)
         ruleFile.build().writeTo(Constants.outputDir)
+
+        val ruleLambda = LambdaTypeName.get(
+            ClassName("browser.${namespace}", "Rule").parameterizedBy(conditionType, actionType),
+            emptyList(),
+            Unit::class.asTypeName()
+        )
+
+        val ruleConstructor = FunSpec.builder("Rule")
+            .addModifiers(KModifier.INLINE)
+            .addTypeVariable(conditionType)
+            .addTypeVariable(actionType)
+            .addParameter(
+                ParameterSpec.builder("block", ruleLambda).build()
+            )
+            .returns(ClassName("browser.${namespace}", "Rule").parameterizedBy(conditionType, actionType))
+            .addStatement("return (js(\"{}\") as Rule<C, A>).apply(block)")
+            .build()
+
+        constructorFileSpec.addFunction(ruleConstructor)
     }
     
     fun createEvent() {

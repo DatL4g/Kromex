@@ -19,6 +19,7 @@ object FunctionGenerator {
     fun create(
         importFileSpec: FileSpec.Builder?,
         typeSpecBuilder: TypeSpec.Builder?,
+        constructorFileSpec: FileSpec.Builder,
         namespace: String,
         extensionFunction: ExtensionFunction,
     ) {
@@ -26,7 +27,7 @@ object FunctionGenerator {
             "Either file or typeSpec must be provided"
         }
 
-        val returnInfo = getReturnInfo(namespace, extensionFunction)
+        val returnInfo = getReturnInfo(constructorFileSpec, namespace, extensionFunction)
         val name = extensionFunction.name
 
         val funSpec = FunSpec.builder(name)
@@ -41,6 +42,7 @@ object FunctionGenerator {
                             val propertyName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}${it.name.replaceFirstChar { char -> char.uppercaseChar() }}"
 
                             ObjectGenerator.create(
+                                constructorFileSpec,
                                 propertyName,
                                 namespace,
                                 null,
@@ -87,20 +89,24 @@ object FunctionGenerator {
 
     fun create(
         typeSpecBuilder: TypeSpec.Builder,
+        constructorFileSpec: FileSpec.Builder,
         namespace: String,
         extensionFunction: ExtensionFunction,
-    ) = create(null, typeSpecBuilder, namespace, extensionFunction)
+    ) = create(null, typeSpecBuilder, constructorFileSpec, namespace, extensionFunction)
 
     fun create(
         importFileSpec: FileSpec.Builder?,
+        constructorFileSpec: FileSpec.Builder,
         namespace: String,
         extensionFunction: ExtensionFunction,
-    ) = create(importFileSpec, null, namespace, extensionFunction)
+    ) = create(importFileSpec, null, constructorFileSpec, namespace, extensionFunction)
 
     private fun getReturnInfo(
+        constructorFileSpec: FileSpec.Builder,
         namespace: String,
         extensionFunction: ExtensionFunction
     ) = getReturnInfo(
+        constructorFileSpec,
         extensionFunction.name,
         namespace,
         extensionFunction.returnsAsync,
@@ -109,6 +115,7 @@ object FunctionGenerator {
     )
 
     fun getReturnInfo(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         returnsAsync: ExtensionFunctionReturn?,
@@ -137,6 +144,7 @@ object FunctionGenerator {
             } else {
                 val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                 ObjectGenerator.create(
+                    constructorFileSpec,
                     returnName,
                     namespace,
                     returnData
@@ -156,6 +164,7 @@ object FunctionGenerator {
                             callbackParam.type.getAsClassName(emptyList(), callbackParam.optional) {
                                 val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                                 ObjectGenerator.create(
+                                    constructorFileSpec,
                                     returnName,
                                     namespace,
                                     callbackParam
@@ -181,13 +190,19 @@ object FunctionGenerator {
                     onMultipleProperties = {
                         it.type.getAsClassName(emptyList(), it.optional) {
                             val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
-                            ObjectGenerator.create(returnName, namespace, it)
+                            ObjectGenerator.create(
+                                constructorFileSpec,
+                                returnName,
+                                namespace,
+                                it
+                            )
                             ClassName("browser.${namespace}", returnName)
                         } ?: Any::class.asTypeName()
                     },
                     onMultipleParams = {
                         val returnName = "${name.replaceFirstChar { char -> char.uppercaseChar() }}Return"
                         ObjectGenerator.create(
+                            constructorFileSpec,
                             returnName,
                             namespace,
                             it

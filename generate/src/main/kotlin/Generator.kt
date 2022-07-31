@@ -157,6 +157,7 @@ private fun generateFile(
 
         ObjectGenerator.addProperty(
             importFileSpec,
+            constructorFileSpec,
             entry.key,
             extension.namespace,
             entry.value
@@ -172,6 +173,7 @@ private fun generateFile(
 
         FunctionGenerator.create(
             importFileSpec,
+            constructorFileSpec,
             extension.namespace,
             function
         )
@@ -185,6 +187,7 @@ private fun generateFile(
         EventGenerator.create(
             importFileSpec,
             null,
+            constructorFileSpec,
             extension.namespace,
             extensionEvent
         )

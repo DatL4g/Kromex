@@ -24,17 +24,19 @@ object ExtensionTypeGenerator {
             else -> {
                 if (namespace.equals("events", true)) {
                     if (extensionType.id.equals("Rule", true)) {
-                        EventSourceGenerator.createRule()
+                        EventSourceGenerator.createRule(constructorFileSpec)
                     } else if (extensionType.id.equals("Event", true)) {
                         EventSourceGenerator.createEvent()
                     } else {
                         ObjectGenerator.create(
+                            constructorFileSpec,
                             namespace,
                             extensionType
                         )
                     }
                 } else {
                     ObjectGenerator.create(
+                        constructorFileSpec,
                         namespace,
                         extensionType
                     )

@@ -15,6 +15,7 @@ import utils.Constants
 object ObjectGenerator {
 
     fun create(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         isInstanceOf: String?,
@@ -58,6 +59,7 @@ object ObjectGenerator {
                 properties.forEach { (t, u) ->
                     addProperty(
                         this,
+                        constructorFileSpec,
                         t,
                         namespace,
                         u
@@ -67,17 +69,35 @@ object ObjectGenerator {
         }
 
         events.forEach {
-            EventGenerator.create(null, typeSpec, namespace, it)
+            EventGenerator.create(null, typeSpec, constructorFileSpec, namespace, it)
         }
+
+        val objectClass = ClassName("browser.${namespace}", name)
+        val objectConstructor = FunSpec.builder(name)
+            .addModifiers(KModifier.INLINE)
+            .addParameter(
+                ParameterSpec.builder("block", LambdaTypeName.get(
+                    objectClass,
+                    emptyList(),
+                    Unit::class.asTypeName()
+                )).build()
+            )
+            .returns(objectClass)
+            .addStatement("return (js(\"{}\") as %T).apply(block)", objectClass)
+            .build()
 
         objectFileBuilder.addType(typeSpec.build())
         objectFileBuilder.build().writeTo(Constants.outputDir)
+
+        constructorFileSpec.addFunction(objectConstructor)
     }
 
     fun create(
+        constructorFileSpec: FileSpec.Builder,
         namespace: String,
         extensionType: ExtensionType
     ) = create(
+        constructorFileSpec,
         extensionType.id,
         namespace,
         extensionType.isInstanceOf,
@@ -88,10 +108,12 @@ object ObjectGenerator {
     )
 
     fun create(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionFunctionParameter: ExtensionFunctionParameter
     ) = create(
+        constructorFileSpec,
         name,
         namespace,
         extensionFunctionParameter.isInstanceOf,
@@ -102,10 +124,12 @@ object ObjectGenerator {
     )
 
     fun create(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         params: List<ExtensionFunctionParameter>
     ) = create(
+        constructorFileSpec,
         name,
         namespace,
         null,
@@ -116,10 +140,12 @@ object ObjectGenerator {
     )
 
     fun create(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionFunctionReturn: ExtensionFunctionReturn
     ) = create(
+        constructorFileSpec,
         name,
         namespace,
         null,
@@ -130,10 +156,12 @@ object ObjectGenerator {
     )
 
     fun create(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionEvent: ExtensionEvent
     ) = create(
+        constructorFileSpec,
         name,
         namespace,
         null,
@@ -146,6 +174,7 @@ object ObjectGenerator {
     private fun createProperty(
         importFileSpec: FileSpec.Builder?,
         typeSpecBuilder: TypeSpec.Builder?,
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
@@ -156,6 +185,7 @@ object ObjectGenerator {
 
         val typeName = extensionProperty.type.getAsClassName(extensionProperty.choices, extensionProperty.optional) {
             createNestedInterface(
+                constructorFileSpec,
                 name,
                 namespace,
                 extensionProperty
@@ -165,6 +195,7 @@ object ObjectGenerator {
                 FunctionGenerator.create(
                     importFileSpec,
                     typeSpecBuilder,
+                    constructorFileSpec,
                     namespace,
                     ExtensionFunction(
                         name,
@@ -180,6 +211,7 @@ object ObjectGenerator {
             } else if (extensionProperty.type.equals("array", true)) {
                 val arrayType = extensionProperty.items?.type.getAsClassName(extensionProperty.items?.choices ?: emptyList(), false) {
                     createNestedInterface(
+                        constructorFileSpec,
                         name,
                         namespace,
                         extensionProperty
@@ -193,6 +225,7 @@ object ObjectGenerator {
 
         if (typeName != null) {
             val property = PropertySpec.builder(name, typeName, KModifier.EXTERNAL)
+                .mutable()
                 .apply {
                     if (!extensionProperty.description.isNullOrEmpty()) {
                         addKdoc(extensionProperty.description)
@@ -214,19 +247,22 @@ object ObjectGenerator {
 
     private fun addProperty(
         objectSpecBuilder: TypeSpec.Builder,
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
-    ) = createProperty(null, objectSpecBuilder, name, namespace, extensionProperty)
+    ) = createProperty(null, objectSpecBuilder, constructorFileSpec, name, namespace, extensionProperty)
 
     fun addProperty(
         importFileSpec: FileSpec.Builder,
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
-    ) = createProperty(importFileSpec, null, name, namespace, extensionProperty)
+    ) = createProperty(importFileSpec, null, constructorFileSpec, name, namespace, extensionProperty)
 
     private fun createNestedInterface(
+        constructorFileSpec: FileSpec.Builder,
         name: String,
         namespace: String,
         extensionProperty: ExtensionProperty
@@ -249,6 +285,7 @@ object ObjectGenerator {
                 extensionProperty.properties.forEach { (t, u) ->
                     addProperty(
                         this,
+                        constructorFileSpec,
                         t,
                         namespace,
                         u
