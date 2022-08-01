@@ -1,22 +1,22 @@
-import browser.action.BadgeDetails
-import browser.tabs.QueryInfo
+import browser.action.SetBadgeTextDetails
+import browser.tabs.QueryQueryInfo
 import common.collect
 import kotlinx.browser.document
 import kotlinx.browser.window
 
 fun main() {
-    browser.action.setBadgeText(BadgeDetails {
+    browser.action.setBadgeText(SetBadgeTextDetails {
         text = "Test"
     })
-    browser.tabs.query(QueryInfo {
+    browser.tabs.query(QueryQueryInfo {
         active = true
         currentWindow = true
     }).collect {
-        val activeTab = it?.firstOrNull()
+        val activeTab = it.firstOrNull()
         console.log(activeTab)
     }
     window.onload = {
-        browser.tabs.captureVisibleTab()?.collect {
+        browser.tabs.captureVisibleTab().collect {
             document.getElementById("capture")?.setAttribute("src", it.toString())
         }
     }

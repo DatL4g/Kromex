@@ -105,11 +105,13 @@ fun main(vararg args: String) {
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/virtual_keyboard_private.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/wallpaper.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/web_navigation.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/master/extensions/common/api/web_request.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/web_request_internal.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/web_view_internal.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/api/web_view_request.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/webstore_private.json?format=TEXT",
         "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/common/extensions/api/webview_tag.json?format=TEXT",
+        "https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/api/windows.json?format=TEXT"
 
     )
 

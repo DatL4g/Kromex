@@ -2,10 +2,11 @@
 
 package browser.extensionTypes
 
-import browser.extensionTypes.details.DeleteInjectDetails
-import browser.extensionTypes.details.ImageDetails
-import browser.extensionTypes.details.InjectDetails
+public inline fun ImageDetails(block: ImageDetails.() -> Unit): ImageDetails = (js("{}") as
+    ImageDetails).apply(block)
 
-inline fun ImageDetails(block: ImageDetails.() -> Unit) = (js("{}") as ImageDetails).apply(block)
-inline fun InjectDetails(block: InjectDetails.() -> Unit) = (js("{}") as InjectDetails).apply(block)
-inline fun DeleteInjectDetails(block: DeleteInjectDetails.() -> Unit) = (js("{}") as DeleteInjectDetails).apply(block)
+public inline fun InjectDetails(block: InjectDetails.() -> Unit): InjectDetails = (js("{}") as
+    InjectDetails).apply(block)
+
+public inline fun DeleteInjectionDetails(block: DeleteInjectionDetails.() -> Unit):
+    DeleteInjectionDetails = (js("{}") as DeleteInjectionDetails).apply(block)

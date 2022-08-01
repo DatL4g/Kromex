@@ -2,5 +2,8 @@
 
 package browser.events
 
-inline fun <C, A> Rule(block: Rule<C, A>.() -> Unit) = (js("{}") as Rule<C, A>).apply(block)
-inline fun UrlFilter(block: UrlFilter.() -> Unit) = (js("{}") as UrlFilter).apply(block)
+public inline fun <C, A> Rule(block: Rule<C, A>.() -> Unit): Rule<C, A> = (js("{}") as Rule<C,
+    A>).apply(block)
+
+public inline fun UrlFilter(block: UrlFilter.() -> Unit): UrlFilter = (js("{}") as
+    UrlFilter).apply(block)

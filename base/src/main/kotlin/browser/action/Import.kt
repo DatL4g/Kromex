@@ -3,119 +3,90 @@
 
 package browser.action
 
-import browser.action.details.*
+import browser.browserAction.ColorArray
 import browser.events.Event
-import browser.tabs.Tab
 import kotlin.js.Promise
 
 /**
- * Sets the title of the browser action. This title appears in the tooltip.
+ * Sets the title of the action. This shows up in the tooltip.
  */
-external fun setTitle(
-    details: TitleDetails
-): Promise<Nothing?>?
+public external fun setTitle(details: SetTitleDetails): Promise<Nothing>?
 
 /**
- * Gets the title of the browser action.
+ * Gets the title of the action.
  */
-external fun getTitle(
-    details: TabDetails
-): Promise<String?>?
+public external fun getTitle(details: TabDetails): Promise<String>
 
 /**
- * Sets the icon for the browser action.
- * The icon can be specified as the path to an image file, as the pixel data from a canvas element, or as a dictionary of one of those.
- * Either the [details path] or the [details imageData] property must be specified.
+ * Sets the icon for the action. The icon can be specified either as the path to an image file or as
+ * the pixel data from a canvas element, or as dictionary of either one of those. Either the
+ * <b>path</b> or the <b>imageData</b> property must be specified.
  */
-external fun setIcon(
-    details: IconDetails,
-    callback: (() -> Unit)?
-)
+public external fun setIcon(details: SetIconDetails): Promise<Nothing>?
 
 /**
- * Sets the icon for the browser action.
- * The icon can be specified as the path to an image file, as the pixel data from a canvas element, or as a dictionary of one of those.
- * Either the [details path] or the [details imageData] property must be specified.
+ * Sets the HTML document to be opened as a popup when the user clicks on the action's icon.
  */
-external fun setIcon(
-    details: IconDetails
-): Promise<Nothing?>?
+public external fun setPopup(details: SetPopupDetails): Promise<Nothing>?
 
 /**
- * Sets the HTML document to be opened as a popup when the user clicks the browser action icon.
+ * Gets the html document set as the popup for this action.
  */
-external fun setPopup(
-    details: PopupDetails
-) : Promise<Nothing?>?
+public external fun getPopup(details: TabDetails): Promise<String>
 
 /**
- * Gets the HTML document that is set as the popup for this browser action.
+ * Sets the badge text for the action. The badge is displayed on top of the icon.
  */
-external fun getPopup(
-    details: TabDetails
-): Promise<String?>?
+public external fun setBadgeText(details: SetBadgeTextDetails): Promise<Nothing>?
 
 /**
- * Sets the badge text for the browser action.
- * The badge is displayed on top of the icon.
+ * Gets the badge text of the action. If no tab is specified, the non-tab-specific badge text is
+ * returned. If <a
+ * href='declarativeNetRequest#setExtensionActionOptions'>displayActionCountAsBadgeText</a> is enabled,
+ * a placeholder text will be returned unless the <a
+ * href='declare_permissions#declarativeNetRequestFeedback'>declarativeNetRequestFeedback</a>
+ * permission is present or tab-specific badge text was provided.
  */
-external fun setBadgeText(
-    details: BadgeDetails
-): Promise<Nothing?>?
-
-/**
- * Gets the badge text of the browser action. If no tab is specified, the non-tab-specific badge text is returned.
- */
-external fun getBadgeText(
-    details: TabDetails
-): Promise<String?>?
+public external fun getBadgeText(details: TabDetails): Promise<String>
 
 /**
  * Sets the background color for the badge.
  */
-external fun setBadgeBackgroundColor(
-    details: BadgeBackgroundDetails
-): Promise<Nothing?>?
+public external fun setBadgeBackgroundColor(details: SetBadgeBackgroundColorDetails):
+    Promise<Nothing>?
 
 /**
- * Gets the background color of the browser action.
+ * Gets the background color of the action.
  */
-external fun getBadgeBackgroundColor(
-    details: TabDetails
-): Promise<Array<Int>?>?
+public external fun getBadgeBackgroundColor(details: TabDetails): Promise<ColorArray>
 
 /**
- * Enables the browser action for a tab.
- * Defaults to enabled.
+ * Enables the action for a tab. By default, actions are enabled.
  *
- * @param tabId the ID of the tab for which to modify the browser action.
+ * @param tabId The id of the tab for which you want to modify the action.
  */
-external fun enable(
-    tabId: Int? = definedExternally
-): Promise<Nothing?>?
+public external fun enable(tabId: Int? = definedExternally): Promise<Nothing>?
 
 /**
- * Disables the browser action for a tab.
+ * Disables the action for a tab.
  *
- * @param tabId the ID of the tab for which to modify the browser action.
+ * @param tabId The id of the tab for which you want to modify the action.
  */
-external fun disable(
-    tabId: Int? = definedExternally
-): Promise<Nothing?>?
+public external fun disable(tabId: Int? = definedExternally): Promise<Nothing>?
 
 /**
- * Opens the extension popup window in the active window but does not grant tab permissions.
+ * Returns the user-specified settings relating to an extension's action.
  */
-external fun openPopup(
-    callback: (Any?) -> Unit
-)
+public external fun getUserSettings(): Promise<UserSettings>
 
 /**
- * Opens the extension popup window in the active window but does not grant tab permissions.
+ * Opens the extension's popup.
+ *
+ * @param options Specifies options for opening the popup.
  */
-external fun openPopup(): Promise<Any?>?
+public external fun openPopup(options: OpenPopupOptions? = definedExternally): Promise<Nothing>
 
 /**
- * Fired when a browser action icon is clicked. Does not fire if the browser action has a popup.
+ * Fired when an action icon is clicked.  This event will not fire if the action has a popup.
  */
-external val onClicked: Event<Tab?, Unit> = definedExternally
+public external val onClicked: Event<OnClickedListener, Unit> = definedExternally

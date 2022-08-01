@@ -4,42 +4,79 @@
 package browser.webRequest
 
 import browser.events.Event
-import browser.webRequest.details.BeforeRequestDetails
-import browser.webRequest.details.BeforeSendHeadersDetails
-import browser.webRequest.details.HeadersReceivedDetails
-import browser.webRequest.details.SendHeadersDetails
 import kotlin.js.Promise
 
 /**
- * The maximum number of times that handlerBehaviorChanged can be called per 10 minute sustained interval.
- * handlerBehaviorChanged is an expensive function call that shouldn't be called often.
+ * The maximum number of times that <code>handlerBehaviorChanged</code> can be called per 10 minute
+ * sustained interval. <code>handlerBehaviorChanged</code> is an expensive function call that shouldn't
+ * be called often.
  */
-external val MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: Number = definedExternally
+public external var MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: Any
 
 /**
- * Needs to be called when the behavior of the webRequest handlers has changed to prevent incorrect handling due to caching.
- * This function call is expensive.
- * Don't call it often.
+ * Needs to be called when the behavior of the webRequest handlers has changed to prevent incorrect
+ * handling due to caching. This function call is expensive. Don't call it often.
  */
-external fun handlerBehaviorChanged(): Promise<Nothing?>?
+public external fun handlerBehaviorChanged(): Promise<Nothing>
 
 /**
  * Fired when a request is about to occur.
  */
-external val onBeforeRequest: Event<BeforeRequestDetails?, BlockingResponse?> = definedExternally
+public external val onBeforeRequest: Event<OnBeforeRequestListener, BlockingResponse?> =
+    definedExternally
 
 /**
- * Fired before sending an HTTP request, once the request headers are available.
- * This may occur after a TCP connection is made to the server, but before any HTTP data is sent.
+ * Fired before sending an HTTP request, once the request headers are available. This may occur
+ * after a TCP connection is made to the server, but before any HTTP data is sent. 
  */
-external val onBeforeSendHeaders: Event<BeforeSendHeadersDetails?, BlockingResponse?> = definedExternally
+public external val onBeforeSendHeaders: Event<OnBeforeSendHeadersListener, BlockingResponse?> =
+    definedExternally
 
 /**
- * Fired just before a request is going to be sent to the server (modifications of previous onBeforeSendHeaders callbacks are visible by the time onSendHeaders is fired).
+ * Fired just before a request is going to be sent to the server (modifications of previous
+ * onBeforeSendHeaders callbacks are visible by the time onSendHeaders is fired).
  */
-external val onSendHeaders: Event<SendHeadersDetails?, Unit> = definedExternally
+public external val onSendHeaders: Event<OnSendHeadersListener, Unit> = definedExternally
 
 /**
  * Fired when HTTP response headers of a request have been received.
  */
-external val onHeadersReceived: Event<HeadersReceivedDetails?, BlockingResponse?> = definedExternally
+public external val onHeadersReceived: Event<OnHeadersReceivedListener, BlockingResponse?> =
+    definedExternally
+
+/**
+ * Fired when an authentication failure is received. The listener has three options: it can provide
+ * authentication credentials, it can cancel the request and display the error page, or it can take no
+ * action on the challenge. If bad user credentials are provided, this may be called multiple times for
+ * the same request. Note, only one of <code>'blocking'</code> or <code>'asyncBlocking'</code> modes
+ * must be specified in the <code>extraInfoSpec</code> parameter.
+ */
+public external val onAuthRequired: Event<OnAuthRequiredListener, Promise<BlockingResponse?>?> =
+    definedExternally
+
+/**
+ * Fired when the first byte of the response body is received. For HTTP requests, this means that
+ * the status line and response headers are available.
+ */
+public external val onResponseStarted: Event<OnResponseStartedListener, Unit> = definedExternally
+
+/**
+ * Fired when a server-initiated redirect is about to occur.
+ */
+public external val onBeforeRedirect: Event<OnBeforeRedirectListener, Unit> = definedExternally
+
+/**
+ * Fired when a request is completed.
+ */
+public external val onCompleted: Event<OnCompletedListener, Unit> = definedExternally
+
+/**
+ * Fired when an error occurs.
+ */
+public external val onErrorOccurred: Event<OnErrorOccurredListener, Unit> = definedExternally
+
+/**
+ * Fired when an extension's proposed modification to a network request is ignored. This happens in
+ * case of conflicts with other extensions.
+ */
+public external val onActionIgnored: Event<OnActionIgnoredListener, Unit> = definedExternally

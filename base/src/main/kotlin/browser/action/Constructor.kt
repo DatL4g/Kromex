@@ -2,11 +2,29 @@
 
 package browser.action
 
-import browser.action.details.*
+public inline fun TabDetails(block: TabDetails.() -> Unit): TabDetails = (js("{}") as
+    TabDetails).apply(block)
 
-inline fun BadgeBackgroundDetails(block: BadgeBackgroundDetails.() -> Unit) = (js("{}") as BadgeBackgroundDetails).apply(block)
-inline fun BadgeDetails(block: BadgeDetails.() -> Unit) = (js("{}") as BadgeDetails).apply(block)
-inline fun IconDetails(block: IconDetails.() -> Unit) = (js("{}") as IconDetails).apply(block)
-inline fun PopupDetails(block: PopupDetails.() -> Unit) = (js("{}") as PopupDetails).apply(block)
-inline fun TabDetails(block: TabDetails.() -> Unit) = (js("{}") as TabDetails).apply(block)
-inline fun TitleDetails(block: TitleDetails.() -> Unit) = (js("{}") as TitleDetails).apply(block)
+public inline fun UserSettings(block: UserSettings.() -> Unit): UserSettings = (js("{}") as
+    UserSettings).apply(block)
+
+public inline fun OpenPopupOptions(block: OpenPopupOptions.() -> Unit): OpenPopupOptions = (js("{}")
+    as OpenPopupOptions).apply(block)
+
+public inline fun SetTitleDetails(block: SetTitleDetails.() -> Unit): SetTitleDetails = (js("{}") as
+    SetTitleDetails).apply(block)
+
+public inline fun SetIconDetails(block: SetIconDetails.() -> Unit): SetIconDetails = (js("{}") as
+    SetIconDetails).apply(block)
+
+public inline fun SetPopupDetails(block: SetPopupDetails.() -> Unit): SetPopupDetails = (js("{}") as
+    SetPopupDetails).apply(block)
+
+public inline fun SetBadgeTextDetails(block: SetBadgeTextDetails.() -> Unit): SetBadgeTextDetails =
+    (js("{}") as SetBadgeTextDetails).apply(block)
+
+public inline fun SetBadgeBackgroundColorDetails(block: SetBadgeBackgroundColorDetails.() -> Unit):
+    SetBadgeBackgroundColorDetails = (js("{}") as SetBadgeBackgroundColorDetails).apply(block)
+
+public inline fun OnClickedListener(block: OnClickedListener.() -> Unit): OnClickedListener =
+    (js("{}") as OnClickedListener).apply(block)

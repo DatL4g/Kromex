@@ -11,8 +11,7 @@ object Constants {
         ignoreUnknownKeys = true
     }
 
-    val testDir = File("./../popup/src/main/kotlin/")
-    val outputDir = testDir
+    val outputDir = File("./../base/src/main/kotlin/")
 
     const val KROMEX =
             "${ConsoleColors.RED_BOLD} __  __${ConsoleColors.RESET}                                  \n" +

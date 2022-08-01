@@ -6,18 +6,19 @@ package browser.webRequest
 /**
  * An object describing filters to apply to webRequest events.
  */
-external interface RequestFilter {
-    /**
-     * A list of URLs or URL patterns. Requests that cannot match any of the URLs will be filtered out.
-     */
-    var urls: Array<String>?
+public external interface RequestFilter {
+  /**
+   * A list of URLs or URL patterns. Requests that cannot match any of the URLs will be filtered
+   * out.
+   */
+  public var urls: Array<String>
 
-    /**
-     * A list of request types. Requests that cannot match any of the types will be filtered out.
-     */
-    var types: Array<ResourceType>?
+  /**
+   * A list of request types. Requests that cannot match any of the types will be filtered out.
+   */
+  public var types: Array<ResourceType>?
 
-    var tabId: Int?
+  public var tabId: Int?
 
-    var windowId: Int?
+  public var windowId: Int?
 }

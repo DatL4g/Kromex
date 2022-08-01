@@ -1,11 +1,16 @@
 package browser.extensionTypes
 
+import kotlin.String
+
 /**
  * The format of an image.
  */
-enum class ImageFormat(private val value: String) {
-    jpeg("jpeg"),
-    png("png");
+public enum class ImageFormat(
+  private val `value`: String,
+) {
+  jpeg("jpeg"),
+  png("png"),
+  ;
 
-    override fun toString(): String = value
+  public override fun toString(): String = value
 }
