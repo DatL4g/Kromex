@@ -1,22 +1,11 @@
-<div style="display: flex; justify-content: center;">
-    <img style="display: inline-block;" src="src/main/resources/icons/icon.png"/>
-    <h1 style="display: inline-block;">• • • 👻</h1>
-</div>
+![Kromex Logo](src/main/resources/icons/icon.png)
 
-<div style="display: flex; justify-content: center; margin-top: -4em;">
-    <h1 style="font-size: 4em;">Kromex</h1>
-</div>
+# Kromex
 
-<div style="display: flex; justify-content: center; margin-top: -2em;">
-    <ul>
-        <li>Ever wanted to create a Web-Extension with Kotlin-JS?</li>
-        <li>You had no idea where to start or implementation was to difficult?</li>
-    </ul>
-</div>
+- Ever wanted to create a Web-Extension with Kotlin-JS?
+- You had no idea where to start or implementation was to difficult?
 
-<div style="display: flex; justify-content: center; margin-top: -2em;">
-    <h3>Kromex to the rescue!</h3>
-</div>
+### Kromex to the rescue!
 
 [![Issues](https://img.shields.io/github/issues/DATL4G/Kromex.svg?style=for-the-badge)](https://github.com/DATL4G/Kromex/issues)
 [![Stars](https://img.shields.io/github/stars/DATL4G/Kromex.svg?style=for-the-badge)](https://github.com/DATL4G/Kromex/stargazers)
@@ -34,6 +23,7 @@
 - <b>Uses:</b> Manifest v3
 - <b>Uses:</b> Kotlin Gradle
 
+## Table of content
 
 - [Getting Started](#getting-started)
 - [Create your extension](#create-your-extension)
