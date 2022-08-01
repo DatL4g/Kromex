@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "dev.datlag.kromex"
-version = "1.0.0"
+version = "0.1.0"
 
 allprojects {
     repositories {
@@ -63,7 +63,7 @@ tasks {
             "$resourceFolder/manifest.json",
             "$resourceFolder/icons",
             "$resourceFolder/html",
-            "$$resourceFolder/css"
+            "$resourceFolder/css"
         )
         into(extensionFolder)
     }

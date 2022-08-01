@@ -3,7 +3,7 @@
 
   "name": "Kromex",
   "description": "Kromex is an extension template written in Kotlin, mainly made for Chrome",
-  "version": "1.0.0",
+  "version": "0.1.0",
 
   "options_ui": {
     "page": "options.html"
