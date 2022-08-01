@@ -44,6 +44,15 @@ object ObjectGenerator {
             TypeSpec.classBuilder(name)
                 .addModifiers(KModifier.ABSTRACT, KModifier.EXTERNAL)
                 .addSuperinterface(Any::class)
+        } else if (additionalProperties != null) {
+            val typeData = additionalProperties.jsonObject["type"]?.jsonPrimitive?.content
+            val typeName = typeData.getAsClassName(emptyList(), false) {
+                Any::class.asTypeName()
+            } ?: Any::class.asTypeName()
+
+            TypeSpec.classBuilder(name)
+                .addModifiers(KModifier.ABSTRACT, KModifier.EXTERNAL)
+                .addSuperinterface(typeName)
         } else {
             TypeSpec.interfaceBuilder(name)
                 .addModifiers(KModifier.EXTERNAL)
@@ -53,21 +62,14 @@ object ObjectGenerator {
             if (!description.isNullOrEmpty()) {
                 addKdoc(description.escapeForKdoc())
             }
-            if (properties.isEmpty() && isInstanceOf.isNullOrEmpty()) {
-                val typeData = additionalProperties?.jsonObject?.get("type")?.jsonPrimitive?.content
-                val typeName = typeData.getAsClassName(emptyList(), false) {
-                    Any::class.asTypeName()
-                } ?: Any::class.asTypeName()
-            } else {
-                properties.forEach { (t, u) ->
-                    addProperty(
-                        this,
-                        constructorFileSpec,
-                        t,
-                        namespace,
-                        u
-                    )
-                }
+            properties.forEach { (t, u) ->
+                addProperty(
+                    this,
+                    constructorFileSpec,
+                    t,
+                    namespace,
+                    u
+                )
             }
         }
 

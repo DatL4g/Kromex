@@ -9,7 +9,7 @@ import browser.events.Event
  * An object which allows two way communication with other pages. See <a
  * href="messaging#connect">Long-lived connections</a> for more information.
  */
-public external interface Port {
+public abstract external class Port : Any {
   /**
    * The name of the port, as specified in the call to $(ref:runtime.connect).
    */

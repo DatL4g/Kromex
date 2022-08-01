@@ -6,4 +6,4 @@ package browser.app
 /**
  * TODO (it's a manifest)
  */
-public external interface Details
+public abstract external class Details : Any

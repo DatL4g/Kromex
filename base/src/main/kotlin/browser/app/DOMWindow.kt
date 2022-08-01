@@ -3,4 +3,4 @@
 
 package browser.app
 
-public external interface DOMWindow
+public abstract external class DOMWindow : Any
