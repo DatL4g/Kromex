@@ -10,12 +10,12 @@ import kotlin.js.Promise
 /**
  * Object reference which can be used to post messages into the guest page.
  */
-public external var contentWindow: ContentWindow
+public external val contentWindow: ContentWindow = definedExternally
 
 /**
  * Interface which provides access to webRequest events on the guest page.
  */
-public external var request: WebRequestEventInterface
+public external val request: WebRequestEventInterface = definedExternally
 
 /**
  * Similar to <a href='contextMenus'>chrome's ContextMenus API</a>, but applies to
@@ -23,7 +23,7 @@ public external var request: WebRequestEventInterface
  * to <code>webview</code>'s context menu. You can choose what types of objects your context menu
  * additions apply to, such as images, hyperlinks, and pages.
  */
-public external var contextMenus: ContextMenus
+public external val contextMenus: ContextMenus = definedExternally
 
 /**
  * Queries audio state.

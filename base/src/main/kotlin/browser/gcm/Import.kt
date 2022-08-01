@@ -9,7 +9,7 @@ import kotlin.js.Promise
 /**
  * The maximum size (in bytes) of all key/value pairs in a message.
  */
-public external var MAX_MESSAGE_SIZE: Any
+public external val MAX_MESSAGE_SIZE: Number = definedExternally
 
 /**
  * Registers the application with FCM. The registration ID will be returned by the

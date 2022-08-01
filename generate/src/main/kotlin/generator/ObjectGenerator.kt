@@ -262,12 +262,12 @@ object ObjectGenerator {
                 }
                 Array::class.asTypeName().parameterizedBy(arrayType)
             } else {
-                Any::class.asTypeName()
+                extensionProperty.guessTypeByValue() ?: Any::class.asTypeName()
             }
         }?.normalizeNullable(extensionProperty.optional)
 
         if (typeName != null) {
-            val property = PropertySpec.builder(name, typeName, KModifier.EXTERNAL)
+            val typeSpecProperty = PropertySpec.builder(name, typeName, KModifier.EXTERNAL)
                 .mutable()
                 .apply {
                     if (!extensionProperty.description.isNullOrEmpty()) {
@@ -278,15 +278,32 @@ object ObjectGenerator {
                     if (!extensionProperty.deprecated.isNullOrEmpty()) {
                         addAnnotation(
                             AnnotationSpec.builder(Deprecated::class)
-                                .addMember("message = %S", extensionProperty.deprecated ?: String())
+                                .addMember("message = %S", extensionProperty.deprecated)
                                 .addMember("level = DeprecationLevel.WARNING")
                                 .build()
                         )
                     }
                 }.build()
 
-            importFileSpec?.addProperty(property)
-            typeSpecBuilder?.addProperty(property)
+            typeSpecBuilder?.addProperty(typeSpecProperty)
+
+            importFileSpec?.addProperty(PropertySpec.builder(name, typeName, KModifier.EXTERNAL)
+                .initializer("definedExternally")
+                .apply {
+                    if (!extensionProperty.description.isNullOrEmpty()) {
+                        try {
+                            addKdoc(extensionProperty.description.escapeForKdoc())
+                        } catch (ignored: Throwable) { }
+                    }
+                    if (!extensionProperty.deprecated.isNullOrEmpty()) {
+                        addAnnotation(
+                            AnnotationSpec.builder(Deprecated::class)
+                                .addMember("message = %S", extensionProperty.deprecated)
+                                .addMember("level = DeprecationLevel.WARNING")
+                                .build()
+                        )
+                    }
+                }.build())
         }
     }
 

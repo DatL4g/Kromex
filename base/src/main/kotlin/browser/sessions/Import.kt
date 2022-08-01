@@ -9,7 +9,7 @@ import kotlin.js.Promise
 /**
  * The maximum number of $(ref:sessions.Session) that will be included in a requested list.
  */
-public external var MAX_SESSION_RESULTS: Any
+public external val MAX_SESSION_RESULTS: Number = definedExternally
 
 /**
  * Gets the list of recently closed tabs and/or windows.

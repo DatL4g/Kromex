@@ -10,12 +10,12 @@ import org.w3c.dom.Window
 /**
  * This will be defined during an API method callback if there was an error
  */
-public external var lastError: LastErrorProperty?
+public external val lastError: LastErrorProperty? = definedExternally
 
 /**
  * The ID of the extension/app.
  */
-public external var id: String
+public external val id: String = definedExternally
 
 /**
  * Retrieves the JavaScript 'window' object for the background page running inside the current

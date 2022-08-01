@@ -9,7 +9,7 @@ import kotlin.js.Promise
 /**
  * An ID that represents the absence of a group.
  */
-public external var TAB_GROUP_ID_NONE: Any
+public external val TAB_GROUP_ID_NONE: Number = definedExternally
 
 /**
  * Retrieves details about the specified group.

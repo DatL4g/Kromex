@@ -223,7 +223,6 @@ private fun generateFile(
     }
 
     extension.properties.entries.forEach { entry ->
-
         ObjectGenerator.addProperty(
             importFileSpec,
             constructorFileSpec,

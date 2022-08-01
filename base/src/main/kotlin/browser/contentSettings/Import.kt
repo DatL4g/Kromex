@@ -9,21 +9,21 @@ package browser.contentSettings
  * for the current session. <br>Default is <var>allow</var>.<br>The primary URL is the URL representing
  * the cookie origin. The secondary URL is the URL of the top-level frame.
  */
-public external var cookies: ContentSetting
+public external val cookies: ContentSetting = definedExternally
 
 /**
  * Whether to show images. One of<br><var>allow</var>: Show images,<br><var>block</var>: Don't show
  * images. <br>Default is <var>allow</var>.<br>The primary URL is the URL of the top-level frame. The
  * secondary URL is the URL of the image.
  */
-public external var images: ContentSetting
+public external val images: ContentSetting = definedExternally
 
 /**
  * Whether to run JavaScript. One of<br><var>allow</var>: Run JavaScript,<br><var>block</var>: Don't
  * run JavaScript. <br>Default is <var>allow</var>.<br>The primary URL is the URL of the top-level
  * frame. The secondary URL is not used.
  */
-public external var javascript: ContentSetting
+public external val javascript: ContentSetting = definedExternally
 
 /**
  * Whether to allow Geolocation. One of <br><var>allow</var>: Allow sites to track your physical
@@ -32,14 +32,14 @@ public external var javascript: ContentSetting
  * primary URL is the URL of the document which requested location data. The secondary URL is the URL
  * of the top-level frame (which may or may not differ from the requesting URL).
  */
-public external var location: ContentSetting
+public external val location: ContentSetting = definedExternally
 
 /**
  * <i>Deprecated.</i> With Flash support removed in Chrome 88, this permission no longer has any
  * effect. Value is always <var>block</var>. Calls to <code>set()</code> and <code>clear()</code> will
  * be ignored.
  */
-public external var plugins: ContentSetting
+public external val plugins: ContentSetting = definedExternally
 
 /**
  * Whether to allow sites to show pop-ups. One of<br><var>allow</var>: Allow sites to show
@@ -47,7 +47,7 @@ public external var plugins: ContentSetting
  * <var>block</var>.<br>The primary URL is the URL of the top-level frame. The secondary URL is not
  * used.
  */
-public external var popups: ContentSetting
+public external val popups: ContentSetting = definedExternally
 
 /**
  * Whether to allow sites to show desktop notifications. One of<br><var>allow</var>: Allow sites to
@@ -56,19 +56,19 @@ public external var popups: ContentSetting
  * is <var>ask</var>.<br>The primary URL is the URL of the document which wants to show the
  * notification. The secondary URL is not used.
  */
-public external var notifications: ContentSetting
+public external val notifications: ContentSetting = definedExternally
 
 /**
  * <i>Deprecated.</i> No longer has any effect. Fullscreen permission is now automatically granted
  * for all sites. Value is always <var>allow</var>.
  */
-public external var fullscreen: ContentSetting
+public external val fullscreen: ContentSetting = definedExternally
 
 /**
  * <i>Deprecated.</i> No longer has any effect. Mouse lock permission is now automatically granted
  * for all sites. Value is always <var>allow</var>.
  */
-public external var mouselock: ContentSetting
+public external val mouselock: ContentSetting = definedExternally
 
 /**
  * Whether to allow sites to access the microphone. One of <br><var>allow</var>: Allow sites to
@@ -78,7 +78,7 @@ public external var mouselock: ContentSetting
  * secondary URL is not used.<br>NOTE: The 'allow' setting is not valid if both patterns are
  * '<all_urls>'.
  */
-public external var microphone: ContentSetting
+public external val microphone: ContentSetting = definedExternally
 
 /**
  * Whether to allow sites to access the camera. One of <br><var>allow</var>: Allow sites to access
@@ -87,7 +87,7 @@ public external var microphone: ContentSetting
  * the document which requested camera access. The secondary URL is not used.<br>NOTE: The 'allow'
  * setting is not valid if both patterns are '<all_urls>'.
  */
-public external var camera: ContentSetting
+public external val camera: ContentSetting = definedExternally
 
 /**
  * Whether to allow sites to run plugins unsandboxed. One of <br><var>allow</var>: Allow sites to
@@ -95,7 +95,7 @@ public external var camera: ContentSetting
  * unsandboxed,<br><var>ask</var>: Ask when a site wants to run a plugin unsandboxed. <br>Default is
  * <var>ask</var>.<br>The primary URL is the URL of the top-level frame. The secondary URL is not used.
  */
-public external var unsandboxedPlugins: ContentSetting
+public external val unsandboxedPlugins: ContentSetting = definedExternally
 
 /**
  * Whether to allow sites to download multiple files automatically. One of <br><var>allow</var>:
@@ -104,4 +104,4 @@ public external var unsandboxedPlugins: ContentSetting
  * automatically after the first file. <br>Default is <var>ask</var>.<br>The primary URL is the URL of
  * the top-level frame. The secondary URL is not used.
  */
-public external var automaticDownloads: ContentSetting
+public external val automaticDownloads: ContentSetting = definedExternally

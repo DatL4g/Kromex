@@ -11,7 +11,7 @@ import kotlin.js.Promise
  * The maximum number of times that $(ref:captureVisibleRegion) can be called per second.
  * $(ref:captureVisibleRegion) is expensive and should not be called too often.
  */
-public external var MAX_CAPTURE_VISIBLE_REGION_CALLS_PER_SECOND: Any
+public external val MAX_CAPTURE_VISIBLE_REGION_CALLS_PER_SECOND: Number = definedExternally
 
 /**
  * Callback that returns audio state.

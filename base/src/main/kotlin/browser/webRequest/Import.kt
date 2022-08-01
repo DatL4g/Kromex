@@ -11,7 +11,7 @@ import kotlin.js.Promise
  * sustained interval. <code>handlerBehaviorChanged</code> is an expensive function call that shouldn't
  * be called often.
  */
-public external var MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: Any
+public external val MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: Number = definedExternally
 
 /**
  * Needs to be called when the behavior of the webRequest handlers has changed to prevent incorrect

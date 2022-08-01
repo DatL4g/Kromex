@@ -15,12 +15,12 @@ import kotlin.js.Promise
  * The maximum number of times that $(ref:captureVisibleTab) can be called per second.
  * $(ref:captureVisibleTab) is expensive and should not be called too often.
  */
-public external var MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND: Any
+public external val MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND: Number = definedExternally
 
 /**
  * An ID that represents the absence of a browser tab.
  */
-public external var TAB_ID_NONE: Any
+public external val TAB_ID_NONE: Number = definedExternally
 
 /**
  * Retrieves details about the specified tab.

@@ -11,7 +11,7 @@ import browser.types.ChromeSetting
  * <code>accessibilityFeatures.read</code> permission. <code>set()</code> and <code>clear()</code>
  * require <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var spokenFeedback: ChromeSetting
+public external val spokenFeedback: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Enlarged cursor. The value indicates whether the feature
@@ -19,7 +19,7 @@ public external var spokenFeedback: ChromeSetting
  * <code>set()</code> and <code>clear()</code> require <code>accessibilityFeatures.modify</code>
  * permission.</p>
  */
-public external var largeCursor: ChromeSetting
+public external val largeCursor: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Sticky modifier keys (like shift or alt). The value
@@ -27,7 +27,7 @@ public external var largeCursor: ChromeSetting
  * <code>accessibilityFeatures.read</code> permission. <code>set()</code> and <code>clear()</code>
  * require <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var stickyKeys: ChromeSetting
+public external val stickyKeys: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>High contrast rendering mode. The value indicates
@@ -35,7 +35,7 @@ public external var stickyKeys: ChromeSetting
  * <code>accessibilityFeatures.read</code> permission. <code>set()</code> and <code>clear()</code>
  * require <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var highContrast: ChromeSetting
+public external val highContrast: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Full screen magnification. The value indicates whether
@@ -43,7 +43,7 @@ public external var highContrast: ChromeSetting
  * permission. <code>set()</code> and <code>clear()</code> require
  * <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var screenMagnifier: ChromeSetting
+public external val screenMagnifier: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Auto mouse click after mouse stops moving. The value
@@ -51,7 +51,7 @@ public external var screenMagnifier: ChromeSetting
  * <code>accessibilityFeatures.read</code> permission. <code>set()</code> and <code>clear()</code>
  * require <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var autoclick: ChromeSetting
+public external val autoclick: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Virtual on-screen keyboard. The value indicates whether
@@ -59,7 +59,7 @@ public external var autoclick: ChromeSetting
  * permission. <code>set()</code> and <code>clear()</code> require
  * <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var virtualKeyboard: ChromeSetting
+public external val virtualKeyboard: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Caret highlighting. The value indicates whether the
@@ -67,7 +67,7 @@ public external var virtualKeyboard: ChromeSetting
  * permission. <code>set()</code> and <code>clear()</code> require
  * <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var caretHighlight: ChromeSetting
+public external val caretHighlight: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Cursor highlighting. The value indicates whether the
@@ -75,7 +75,7 @@ public external var caretHighlight: ChromeSetting
  * permission. <code>set()</code> and <code>clear()</code> require
  * <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var cursorHighlight: ChromeSetting
+public external val cursorHighlight: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Cursor color. The value indicates whether the feature is
@@ -83,7 +83,7 @@ public external var cursorHighlight: ChromeSetting
  * <code>accessibilityFeatures.read</code> permission. <code>set()</code> and <code>clear()</code>
  * require <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var cursorColor: ChromeSetting
+public external val cursorColor: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Docked magnifier. The value indicates whether docked
@@ -91,7 +91,7 @@ public external var cursorColor: ChromeSetting
  * <code>accessibilityFeatures.read</code> permission. <code>set()</code> and <code>clear()</code>
  * require <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var dockedMagnifier: ChromeSetting
+public external val dockedMagnifier: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Focus highlighting. The value indicates whether the
@@ -99,7 +99,7 @@ public external var dockedMagnifier: ChromeSetting
  * permission. <code>set()</code> and <code>clear()</code> require
  * <code>accessibilityFeatures.modify</code> permission.</p>
  */
-public external var focusHighlight: ChromeSetting
+public external val focusHighlight: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Select-to-speak. The value indicates whether the feature
@@ -107,7 +107,7 @@ public external var focusHighlight: ChromeSetting
  * <code>set()</code> and <code>clear()</code> require <code>accessibilityFeatures.modify</code>
  * permission.</p>
  */
-public external var selectToSpeak: ChromeSetting
+public external val selectToSpeak: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Switch Access. The value indicates whether the feature
@@ -115,14 +115,14 @@ public external var selectToSpeak: ChromeSetting
  * <code>set()</code> and <code>clear()</code> require <code>accessibilityFeatures.modify</code>
  * permission.</p>
  */
-public external var switchAccess: ChromeSetting
+public external val switchAccess: ChromeSetting = definedExternally
 
 /**
  * <code>get()</code> requires <code>accessibilityFeatures.read</code> permission.
  * <code>set()</code> and <code>clear()</code> require <code>accessibilityFeatures.modify</code>
  * permission.
  */
-public external var animationPolicy: ChromeSetting
+public external val animationPolicy: ChromeSetting = definedExternally
 
 /**
  * <p><strong>ChromeOS only.</strong></p><p>Dictation. The value indicates whether the feature is
@@ -130,4 +130,4 @@ public external var animationPolicy: ChromeSetting
  * <code>set()</code> and <code>clear()</code> require <code>accessibilityFeatures.modify</code>
  * permission.</p>
  */
-public external var dictation: ChromeSetting
+public external val dictation: ChromeSetting = definedExternally

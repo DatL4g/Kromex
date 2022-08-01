@@ -14,13 +14,13 @@ import kotlin.js.Promise
   message = "Please use ${'$'}(ref:runtime.lastError).",
   level = DeprecationLevel.WARNING,
 )
-public external var lastError: LastErrorProperty?
+public external val lastError: LastErrorProperty? = definedExternally
 
 /**
  * True for content scripts running inside incognito tabs, and for extension pages running inside an
  * incognito process. The latter only applies to extensions with 'split' incognito_behavior.
  */
-public external var inIncognitoContext: Boolean?
+public external val inIncognitoContext: Boolean? = definedExternally
 
 /**
  * Sends a single request to other listeners within the extension. Similar to

@@ -9,7 +9,7 @@ import browser.types.ChromeSetting
 /**
  * Proxy settings to be used. The value of this setting is a ProxyConfig object.
  */
-public external var settings: ChromeSetting
+public external val settings: ChromeSetting = definedExternally
 
 /**
  * Notifies about proxy errors.

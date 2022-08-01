@@ -9,12 +9,12 @@ import kotlin.js.Promise
 /**
  * The windowId value that represents the absence of a Chrome browser window.
  */
-public external var WINDOW_ID_NONE: Any
+public external val WINDOW_ID_NONE: Number = definedExternally
 
 /**
  * The windowId value that represents the <a href='windows#current-window'>current window</a>.
  */
-public external var WINDOW_ID_CURRENT: Any
+public external val WINDOW_ID_CURRENT: Number = definedExternally
 
 /**
  * Gets details about a window.

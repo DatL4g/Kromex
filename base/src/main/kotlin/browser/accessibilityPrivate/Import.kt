@@ -9,7 +9,7 @@ import kotlin.js.Promise
 /**
  * Property to indicate whether event source should default to touch.
  */
-public external var IS_DEFAULT_EVENT_SOURCE_TOUCH: Int
+public external val IS_DEFAULT_EVENT_SOURCE_TOUCH: Int = definedExternally
 
 /**
  * Called to translate localeCodeToTranslate into human-readable string in the locale specified by

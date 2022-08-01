@@ -10,7 +10,7 @@ import kotlin.js.Promise
  * The maximum number of top level extension items that can be added to an extension action context
  * menu. Any items beyond this limit will be ignored.
  */
-public external var ACTION_MENU_TOP_LEVEL_LIMIT: Any
+public external val ACTION_MENU_TOP_LEVEL_LIMIT: Number = definedExternally
 
 /**
  * Creates a new context menu item. If an error occurs during creation, it may not be detected until

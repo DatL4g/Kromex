@@ -10,13 +10,13 @@ import kotlin.js.Promise
   message = "Bookmark write operations are no longer limited by Chrome.",
   level = DeprecationLevel.WARNING,
 )
-public external var MAX_WRITE_OPERATIONS_PER_HOUR: Any
+public external val MAX_WRITE_OPERATIONS_PER_HOUR: Number = definedExternally
 
 @Deprecated(
   message = "Bookmark write operations are no longer limited by Chrome.",
   level = DeprecationLevel.WARNING,
 )
-public external var MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE: Any
+public external val MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE: Number = definedExternally
 
 /**
  * Retrieves the specified BookmarkTreeNode(s).
